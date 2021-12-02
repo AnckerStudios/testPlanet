@@ -1,0 +1,9 @@
+!!entity.PlanetSystem
+centralObject: !!entity.Star {id: null, name: sun}
+name: testSystem
+satillites:
+- !!entity.Planet
+  id: null
+  name: Earth
+  ores: []
+  satillites: []
