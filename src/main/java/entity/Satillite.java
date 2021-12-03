@@ -1,7 +1,7 @@
 package entity;
 
 public class Satillite {
-    private Long id;
+    private int id;
     private String name;
     private Ore[] ores;
 
@@ -10,11 +10,11 @@ public class Satillite {
         this.ores = ores;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -33,4 +33,17 @@ public class Satillite {
     public void setOres(Ore[] ores) {
         this.ores = ores;
     }
+
+    public String toString(int offset){
+        String tab = "\t";
+        for(int i = 1; i < offset; i++)
+            tab = tab+tab;
+        StringBuffer sb = new StringBuffer();
+        sb.append(tab+"Объект : " + this.name + "\n");
+        sb.append(tab+"Руды : \n");
+        for(Ore o : getOres())
+            sb.append(tab + o.toString(offset));
+        return sb.toString();
+    }
+
 }

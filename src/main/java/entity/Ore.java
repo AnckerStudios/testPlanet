@@ -24,4 +24,12 @@ public class Ore {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+    public String toString(int offset){
+        String tab = "\t";
+        for(int i = 1; i < offset; i++)
+            tab = tab+tab;
+        StringBuffer sb = new StringBuffer();
+        sb.append(tab+ this.name + " / " + this.quantity + "\n");
+        return sb.toString();
+    }
 }

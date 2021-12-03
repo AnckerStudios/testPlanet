@@ -1,18 +1,18 @@
 package entity;
 
 public class Star implements CentralObject{
-    private Long id;
+    private int id;
     private String name;
 
     public Star(String name) {
         this.name = name;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -22,5 +22,10 @@ public class Star implements CentralObject{
 
     public void setName(String name) {
         this.name = name;
+    }
+    public String toString(){
+        StringBuffer sb = new StringBuffer();
+        sb.append(this.name);
+        return sb.toString();
     }
 }

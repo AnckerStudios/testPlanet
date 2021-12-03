@@ -1,9 +1,19 @@
 !!entity.PlanetSystem
-centralObject: !!entity.Star {id: null, name: sun}
+centralObject: !!entity.Star {id: 0, name: sun}
 name: testSystem
 satillites:
 - !!entity.Planet
-  id: null
+  id: 0
   name: Earth
-  ores: []
-  satillites: []
+  ores:
+  - {name: Цинк, quantity: 21}
+  - {name: Олово, quantity: 50}
+  satillites:
+  - id: 0
+    name: Moon
+    ores:
+    - {name: Цинк, quantity: 21}
+- id: 0
+  name: D12
+  ores:
+  - {name: Медь, quantity: 21}

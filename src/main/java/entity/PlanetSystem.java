@@ -3,12 +3,12 @@ package entity;
 public class PlanetSystem {
     private String name;
     private CentralObject centralObject;
-    private Satillite[] satillites;
+    private Satillite[] planetArray;
 
-    public PlanetSystem(String name, CentralObject centralObject, Satillite[] satillites) {
+    public PlanetSystem(String name, CentralObject centralObject, Satillite[] planetArray) {
         this.name = name;
         this.centralObject = centralObject;
-        this.satillites = satillites;
+        this.planetArray = planetArray;
     }
 
     public String getName() {
@@ -28,10 +28,10 @@ public class PlanetSystem {
     }
 
     public Satillite[] getSatillites() {
-        return satillites;
+        return planetArray;
     }
 
     public void setSatillites(Satillite[] satillites) {
-        this.satillites = satillites;
+        this.planetArray = satillites;
     }
 }
