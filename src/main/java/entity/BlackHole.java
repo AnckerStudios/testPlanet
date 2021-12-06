@@ -1,19 +1,18 @@
 package entity;
 
-public class BlackHole {
-    private Long id;
+public class BlackHole implements CentralObject{
+    private int id;
     private String name;
 
-    public BlackHole(Long id, String name) {
-        this.id = id;
+    public BlackHole(String name) {
         this.name = name;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
