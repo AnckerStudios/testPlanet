@@ -1,9 +1,10 @@
 !!entity.PlanetSystem
-centralObject: !!entity.Star {id: null, name: sun}
+centralObject: !!entity.Star {id: 0, name: sun}
 name: testSystem
-satillites:
+planetArray:
 - !!entity.Planet
-  id: null
+  climate: Normal
+  id: 0
   name: Earth
   ores: []
   satillites: []

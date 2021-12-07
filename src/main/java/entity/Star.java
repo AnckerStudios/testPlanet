@@ -1,25 +1,24 @@
 package entity;
 
 public class Star implements CentralObject{
-    private Long id;
+    private int id;
     private String name;
 
+    // Construct
     public Star(String name) {
         this.name = name;
     }
 
-    public Long getId() {
+    // Set n' Get
+    public int getId() {
         return id;
     }
-
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
-
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
