@@ -1,11 +1,11 @@
 !!entity.PlanetSystem
 centralObject: !!entity.Star {id: 0, name: sun}
 name: testSystem
-planetArray:
+planets:
 - !!entity.Planet
   climate: Normal
   creatures: []
   id: 0
   name: Earth
   ores: []
-  satillites: []
+  satellites: []

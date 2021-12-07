@@ -1,4 +1,5 @@
 package entity;
+import exceptions.*;
 
 public class Planet extends Satillite{
     private Satillite[] satillites;
@@ -10,16 +11,26 @@ public class Planet extends Satillite{
     }
 
     // Set n' Get
-    public Satillite[] getSatillites() {
+    public Satillite[] getSatellites() {
         return satillites;
     }
-    public void setSatillites(Satillite[] satillites) {
+    public void setSatellites(Satillite[] satillites) {
         this.satillites = satillites;
     }
 
     // Methods
-    public Satillite setPlanetById(int id, Satillite data){
-        return satillites[id] = data;
+    public Satillite getSatelliteById(int id){
+        if(id < 0 && id > satillites.length){
+            throw new SatelliteIdOutOfBoundsException();
+        }
+        return satillites[id];
+    }
+
+    public void setPlanetById(int id, Satillite data){
+        if(id < 0 && id > satillites.length){
+            throw new SatelliteIdOutOfBoundsException();
+        }
+        satillites[id] = data;
     }
 
     public void addSatellite(Satillite data){
@@ -31,32 +42,36 @@ public class Planet extends Satillite{
         satillites = newArray;
     }
 
-    /* public void delSatelliteById(int id) {
-        Satillite[] newArray = new Satillite[satillites.length - 1];
-        for (int i = 0; i < newArray.length; i++) {
-            if (i == id) {
-                continue;
-            } else if (i < id) {
-                newArray[i] = satillites[i];
-            } else {
-                newArray[i] = satillites[i + 1];
-            }
+    public void delSatelliteById(int id) {
+        if(id < 0 && id > satillites.length){
+            throw new SatelliteIdOutOfBoundsException();
         }
-        satillites = newArray;
-    }*/
+        Creatures[] newArray = new Creatures[satillites.length];
+        System.arraycopy(satillites, 0, newArray, 0, newArray.length);
+        satillites = new Satillite[newArray.length - 1];
+        if (id == 0) {
+            System.arraycopy(newArray, 1, satillites, 0, satillites.length);
+        }
+        else if (id == newArray.length) {
+            System.arraycopy(newArray, 0, satillites, 0, satillites.length);
+        }
+        else {
+            System.arraycopy(newArray, 0, satillites, 0, id);
+            System.arraycopy(newArray, id + 1, satillites, id, satillites.length - id);
+        }
+    }
 
     @Override
     public String toString() {
         String tempString;
         tempString = "Planet " + super.getName() + " info:\n" + "Climate: " + getClimate() + "\n";
         for (int i = 0; i < getCreatures().length; i++) {
-            tempString += getCreatureOnSatelliteByNum(i).toString() + "\n";
+            tempString += getCreatureByNum(i).toString() + "\n";
         }
         for (int i = 0; i < satillites.length; i++) {
-            tempString += satillites[i].toString();
+            tempString += this.satillites[i].toString();
         }
         return tempString;
     }
-
 
 }

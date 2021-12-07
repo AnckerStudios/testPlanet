@@ -21,7 +21,12 @@ public class Ore {
         return quantity;
     }
     public void setQuantity(int quantity) {
-        this.quantity = quantity;
+        if(quantity <= 0){
+            throw new IndexOutOfBoundsException();
+        }
+        else {
+            this.quantity = quantity;
+        }
     }
 
     // Methods

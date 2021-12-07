@@ -26,8 +26,8 @@ public class Main {
         Ore[] oreArray = new Ore[2];
         oreArray[0] = new Ore("Emerald", 12);
         oreArray[1] = new Ore("Iron", 23);
-        Satillite satillite = new Satillite("Weow", "Tropical", anArr, oreArray);
-        System.out.println(satillite.toString());
+        Satillite satellite = new Satillite("Weow", "Tropical", anArr, oreArray);
+        System.out.println(satellite.toString());
 
         Satillite[] sArr = new Satillite[3];
         sArr[0] = new Satillite("Exot", "Tropical", anArr, oreArray);
@@ -40,7 +40,15 @@ public class Main {
         Planet planet = new Planet("Squier", "Tropical", anArr, oreArray1, sArr);
         System.out.println(planet.toString());
 
-
-
+        System.out.println("Add a new ore 'Titan' by 0 num to satellite: ");
+        Ore newOre = new Ore("Titan", 11);
+        satellite.addOreByNum(0, newOre);
+        System.out.println(satellite.toString());
+        System.out.println("Delete ore 'Emerald' from satellite: ");
+        satellite.delOreByNum(1);
+        System.out.println(satellite.toString());
+        for (int i = 0; i < satellite.getTotalAmountOfOre(); i++) {
+            System.out.println(satellite.getSortedOreByQuantity()[i].getName() + " | " + satellite.getSortedOreByQuantity()[i].getQuantity());
+        }
     }
 }
