@@ -1,13 +1,13 @@
 package entity;
 
-public class Ore {
-    private String name;
-    private int quantity;
+public class Creatures {
+    String name;
+    String type;
 
     // Construct
-    public Ore(String name, int quantity) {
+    public Creatures(String name, String type) {
         this.name = name;
-        this.quantity = quantity;
+        this.type = type;
     }
 
     // Set n' Get
@@ -17,24 +17,24 @@ public class Ore {
     public void setName(String name) {
         this.name = name;
     }
-    public int getQuantity() {
-        return quantity;
+    public String getType() {
+        return type;
     }
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setType(String type) {
+        this.type = type;
     }
 
     // Methods
     @Override
     public String toString(){
         String tempString;
-        tempString = "\t\tOre: " + this.getName() + " | Quantity: " + this.getQuantity();
+        tempString = "\t\tCreature: " + this.getName() + " | Type: " + this.getType();
         return tempString;
     }
     @Override
     public boolean equals(Object obj){
-        if(!(obj instanceof Ore) ) return false;
-        if(this.getName() == ((Ore) obj).getName() && this.getQuantity() == ((Ore) obj).getQuantity()) return true;
+        if(!(obj instanceof Creatures) ) return false;
+        if(this.getName() == ((Creatures) obj).getName() && this.getType() == ((Creatures) obj).getType()) return true;
         else return false;
     }
     @Override

@@ -1,5 +1,7 @@
 package entity;
 
+import interfaces.CentralObject;
+
 public class PlanetSystem {
     private String name;
     private CentralObject centralObject;

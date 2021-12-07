@@ -4,6 +4,7 @@ name: testSystem
 planetArray:
 - !!entity.Planet
   climate: Normal
+  creatures: []
   id: 0
   name: Earth
   ores: []

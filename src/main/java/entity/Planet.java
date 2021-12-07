@@ -4,8 +4,8 @@ public class Planet extends Satillite{
     private Satillite[] satillites;
 
     // Construct
-    public Planet(String name, String climate, Ore[] ores, Satillite[] satillites) {
-        super(name, climate, ores);
+    public Planet(String name, String climate, Creatures[] createrus, Ore[] ores, Satillite[] satillites) {
+        super(name, climate, createrus, ores);
         this.satillites = satillites;
     }
 
@@ -31,7 +31,7 @@ public class Planet extends Satillite{
         satillites = newArray;
     }
 
-    public void delSatelliteById(int id) {
+    /* public void delSatelliteById(int id) {
         Satillite[] newArray = new Satillite[satillites.length - 1];
         for (int i = 0; i < newArray.length; i++) {
             if (i == id) {
@@ -43,15 +43,20 @@ public class Planet extends Satillite{
             }
         }
         satillites = newArray;
-    }
+    }*/
 
     @Override
     public String toString() {
         String tempString;
         tempString = "Planet " + super.getName() + " info:\n" + "Climate: " + getClimate() + "\n";
+        for (int i = 0; i < getCreatures().length; i++) {
+            tempString += getCreatureOnSatelliteByNum(i).toString() + "\n";
+        }
         for (int i = 0; i < satillites.length; i++) {
             tempString += satillites[i].toString();
         }
         return tempString;
     }
+
+
 }
