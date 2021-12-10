@@ -1,9 +1,5 @@
 package entity;
-
-import exceptions.PlanetIdOutOfBoundsException;
 import interfaces.CentralObject;
-
-import javax.xml.crypto.Data;
 import java.util.LinkedList;
 
 public class PlanetSystem {
@@ -43,6 +39,15 @@ public class PlanetSystem {
         return planets.get(id);
     }
 
+    public Satellite getPlanetByName(String name){
+        for (int i = 0; i < planets.size(); i++) {
+            if(planets.get(i).getName() == name){
+                return planets.get(i);
+            }
+        }
+        return null;
+    }
+
     public Satellite setPlanetById(int id, Satellite data) {
         return planets.set(id, data);
     }
@@ -55,4 +60,16 @@ public class PlanetSystem {
        planets.remove(id);
     }
 
+    public int getAmountOfPlanets(){
+        return planets.size();
+    }
+
+    public String toString() {
+        String tempString;
+        tempString = "\tPlanet System " + this.getName() +" has " + getAmountOfPlanets() + "planets. Info:\n";
+        for (int i = 0; i < getAmountOfPlanets(); i++) {
+            tempString += planets.get(i).toString() + "\n";
+        }
+        return tempString;
+    }
 }

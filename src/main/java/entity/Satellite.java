@@ -3,6 +3,7 @@ import exceptions.*;
 import java.util.LinkedList;
 
 public class Satellite {
+    private static int idSequence = 0;
     private int id;
     private String name;
     private String climate;
@@ -11,6 +12,7 @@ public class Satellite {
 
     // Construct
     public Satellite(String name, String climate, LinkedList<Creatures> creatures, LinkedList <Ore> ores) {
+        this.id = idSequence++;
         this.name = name;
         this.ores = ores;
         this.climate = climate;
@@ -131,7 +133,7 @@ public class Satellite {
     @Override
     public String toString(){
         String tempString;
-        tempString = "\tSatellite " + this.getName() + " info:\n" + "\t\tClimate: " + getClimate() + "\n";
+        tempString = "\tSatellite " + this.getId() + ' ' + this.getName() + " info:\n" + "\t\tClimate: " + getClimate() + "\n";
         for (int i = 0; i < getOres().size(); i++) {
             tempString += getOreByIndex(i).toString() + "\n";
         }
