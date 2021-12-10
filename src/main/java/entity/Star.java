@@ -3,7 +3,9 @@ package entity;
 public class Star implements CentralObject{
     private int id;
     private String name;
-
+    public Star() {
+        this.name = "1";
+    }
     public Star(String name) {
         this.name = name;
     }

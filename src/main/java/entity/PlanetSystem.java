@@ -5,6 +5,11 @@ public class PlanetSystem {
     private CentralObject centralObject;
     private Satillite[] planetArray;
 
+    public PlanetSystem() {
+        this.name = "1";
+        this.centralObject = centralObject;
+        this.planetArray = planetArray;
+    }
     public PlanetSystem(String name, CentralObject centralObject, Satillite[] planetArray) {
         this.name = name;
         this.centralObject = centralObject;

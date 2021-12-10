@@ -2,6 +2,11 @@ package entity;
 
 public class Planet extends Satillite{
     private Satillite[] satillites;
+
+    public Planet() {
+        super();
+        this.satillites = new Satillite[1];
+    }
     public Planet(String name, Ore[] ores, Satillite[] satillites) {
         super(name, ores);
         this.satillites = satillites;
@@ -42,15 +47,15 @@ public class Planet extends Satillite{
     public String toString(int offset){
         String tab = "\t";
         for(int i = 1; i < offset; i++)
-            tab = tab+tab;
+            tab = tab+"\t";
         StringBuffer sb = new StringBuffer();
         sb.append(tab+"Объект : " + getName() + "\n");
-        sb.append(tab+"Руды : \n");
+        sb.append(tab+"\tРуды : \n");
         for(Ore o : getOres())
-            sb.append(tab + o.toString(offset));
-        sb.append(tab+"Спутники : \n");
+            sb.append(o.toString(offset+2));
+        sb.append(tab+"\tСпутники : \n");
         for(Satillite s : satillites)
-            sb.append(tab + s.toString(offset+1));
+            sb.append(s.toString(offset+2));
         return sb.toString();
     }
 }

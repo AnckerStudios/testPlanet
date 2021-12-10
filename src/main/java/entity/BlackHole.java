@@ -4,6 +4,9 @@ public class BlackHole implements CentralObject{
     private int id;
     private String name;
 
+    public BlackHole() {
+        this.name = "1";
+    }
     public BlackHole(String name) {
         this.name = name;
     }
