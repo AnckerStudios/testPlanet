@@ -1,27 +1,29 @@
 package entity;
 import exceptions.*;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class Planet extends Satellite {
-    private LinkedList <Satellite> satellites;
-    private static int idSequence = 0;
-    private int id;
+    private ArrayList<Satellite> satellites;
+    final private UUID id;
+
     // Construct
-    public Planet(String name, String climate, LinkedList<Creatures> creatures, LinkedList<Ore> ores, LinkedList <Satellite> satellites) {
+    public Planet(String name, String climate, List<Creatures> creatures, List<Ore> ores, ArrayList<Satellite> satellites) {
         super(name, climate, creatures, ores);
-        this.id = idSequence++;
+        this.id = UUID.randomUUID();
         this.satellites = satellites;
     }
-    public Planet(String name, String climate, LinkedList<Creatures> creatures, LinkedList<Ore> ores) {
+    public Planet(String name, String climate, List<Creatures> creatures, List<Ore> ores) {
         super(name, climate, creatures, ores);
-        this.id = idSequence++;
+        this.id = UUID.randomUUID();
     }
 
     // Set n' Get
-    public LinkedList <Satellite> getSatellites() {
+    public ArrayList <Satellite> getSatellites() {
         return satellites;
     }
-    public void setSatellites(LinkedList <Satellite> satellites) {
+    public void setSatellites(ArrayList <Satellite> satellites) {
         this.satellites = satellites;
     }
 
@@ -51,8 +53,8 @@ public class Planet extends Satellite {
     @Override
     public String toString() {
         String tempString;
-        tempString = "Planet " + this.getId() + " " +super.getName() + " info:\n" + "Climate: " + getClimate() + "\n";
-        for (int i = 0; i < getCreatures().size(); i++) {
+        tempString = "Planet " + super.getName() + " info:\n" + "Climate: " + getClimate() + "\n";
+        for (int i = 0; i < creatures.size(); i++) {
             tempString += getCreatureByIndex(i).toString() + "\n";
         }
         if(satellites != null) {

@@ -1,23 +1,20 @@
 package entity;
-
 import interfaces.CentralObject;
+import java.util.UUID;
 
 public class BlackHole implements CentralObject {
-    private int id;
+    private UUID id;
     private String name;
 
     // Construct
     public BlackHole(int id, String name) {
-        this.id = id;
+        this.id = UUID.randomUUID();
         this.name = name;
     }
 
     // Set n' Get
-    public int getId() {
+    public UUID getId() {
         return id;
-    }
-    public void setId(int id) {
-        this.id = id;
     }
     public String getName() {
         return name;

@@ -1,8 +1,8 @@
 package entity;
 
 public class Creatures {
-    String name;
-    String type;
+    private String name;
+    private String type;
 
     // Construct
     public Creatures(String name, String type) {

@@ -1,39 +1,27 @@
 import entity.*;
 import interfaces.CentralObject;
-import org.yaml.snakeyaml.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.util.LinkedList;
+import java.util.ArrayList;
+
 
 public class Main {
     public static void main(String[] args) {
-       /* PlanetSystem ps = new PlanetSystem("testSystem", new Star("sun"), new Satellite[]{new Planet("Earth", "Normal", new Creatures[]{}, new Ore[]{}, new Satellite[]{})});
-        try {
-            PrintWriter writer = new PrintWriter(new File("planet.yml"));
-            Yaml yaml = new Yaml();
-            yaml.dump(ps, writer);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }*/
-
         // Methods test
-        LinkedList<Creatures> creaturesList = new LinkedList<>();
+        ArrayList<Creatures> creaturesList = new ArrayList<>();
         creaturesList.add(new Creatures("Wolf", "Predator"));
         creaturesList.add(new Creatures("Elephant", "Herbivory"));
 
-        LinkedList<Ore> oreList = new LinkedList<>();
+        ArrayList<Ore> oreList = new ArrayList<>();
         oreList.add(new Ore("Emerald", 12));
         oreList.add(new Ore("Iron", 23));
         Satellite satellite = new Satellite("Weow", "Tropical", creaturesList, oreList);
         System.out.println(satellite);
 
-        LinkedList<Satellite> sList = new LinkedList<>();
+        ArrayList<Satellite> sList = new ArrayList<>();
         sList.add(new Satellite("Exot", "Tropical", creaturesList, oreList));
         sList.add(new Satellite("Synth", "Tropical", creaturesList, oreList));
         sList.add(new Satellite("Roland", "Tropical", creaturesList, oreList));
 
-        LinkedList<Ore> oreList1 = new LinkedList<>();
+        ArrayList<Ore> oreList1 = new ArrayList<>();
         oreList1.add(new Ore("Diamonds", 2));
         oreList1.add(new Ore("Platinum", 4));
         Planet planet = new Planet("Squire", "Tropical", creaturesList, oreList1, sList);
@@ -43,8 +31,7 @@ public class Main {
         Ore newOre = new Ore("Titan", 11);
         satellite.addOre(newOre);
         System.out.println(satellite);
-        /*System.out.println("Delete ore 'Emerald' from satellite: ");
-        satellite.delOreByIndex(0);*/
+
         System.out.println(satellite);
         System.out.println("Sorted ores: ");
         for (int i = 0; i < satellite.getTotalAmountOfOre(); i++) {
@@ -52,12 +39,11 @@ public class Main {
         }
         Planet planet1 = new Planet("G&L", "Polar", creaturesList, oreList1);
         CentralObject cO = new Star("Unix");
-        LinkedList <Satellite> pL = new LinkedList<>();
+        ArrayList <Planet> pL = new ArrayList<>();
         pL.add(planet);
         pL.add(planet1);
         PlanetSystem pS = new PlanetSystem("Origin", cO, pL);
         System.out.println(pS.getPlanetByName("G&L"));
-
 
         planet.delSatelliteById(1);
         System.out.println(planet);
@@ -65,6 +51,13 @@ public class Main {
         Planet planet2 = new Planet("Berhinger", "Ocean", creaturesList, oreList);
         pS.addPlanet(planet2);
         System.out.println(pS);
+        pS.delPlanetByName("G&L");
+        System.out.println(pS);
+
+        pS.addSatelliteToPlanet("Squire", new Satellite("Weow", "Forest", creaturesList, oreList));
+        System.out.println("================================");
+        System.out.println(planet);
+
 
     }
 }

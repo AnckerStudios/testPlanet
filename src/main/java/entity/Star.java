@@ -1,22 +1,20 @@
 package entity;
-
 import interfaces.CentralObject;
+import java.util.UUID;
 
 public class Star implements CentralObject {
-    private int id;
+    private UUID id;
     private String name;
 
     // Construct
     public Star(String name) {
+        this.id = UUID.randomUUID();
         this.name = name;
     }
 
     // Set n' Get
-    public int getId() {
+    public UUID getId() {
         return id;
-    }
-    public void setId(int id) {
-        this.id = id;
     }
     public String getName() {
         return name;

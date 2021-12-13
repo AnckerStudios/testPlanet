@@ -42,8 +42,4 @@ public class Ore {
         if(this.getName() == ((Ore) obj).getName() && this.getQuantity() == ((Ore) obj).getQuantity()) return true;
         else return false;
     }
-    @Override
-    public Object clone() throws CloneNotSupportedException{
-        return super.clone();
-    }
 }

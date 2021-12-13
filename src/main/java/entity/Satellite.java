@@ -1,18 +1,18 @@
 package entity;
 import exceptions.*;
-import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 public class Satellite {
-    private static int idSequence = 0;
-    private int id;
+    final private UUID id;
     private String name;
     private String climate;
-    private LinkedList <Creatures> creatures;
-    private LinkedList <Ore> ores;
+    protected List <Creatures> creatures;
+    protected List <Ore> ores;
 
     // Construct
-    public Satellite(String name, String climate, LinkedList<Creatures> creatures, LinkedList <Ore> ores) {
-        this.id = idSequence++;
+    public Satellite(String name, String climate, List<Creatures> creatures, List <Ore> ores) {
+        this.id = UUID.randomUUID();
         this.name = name;
         this.ores = ores;
         this.climate = climate;
@@ -20,16 +20,8 @@ public class Satellite {
     }
 
     // Set n' Get
-    public int getId() {
+    public UUID getId() {
         return id;
-    }
-    public void setId(int id) {
-        if(id < 0){
-            throw  new IndexOutOfBoundsException();
-        }
-        else {
-            this.id = id;
-        }
     }
     public String getName() {
         return name;
@@ -37,10 +29,10 @@ public class Satellite {
     public void setName(String name) {
         this.name = name;
     }
-    public LinkedList <Ore> getOres() {
+    public List <Ore> getOres() {
         return ores;
     }
-    public void setOres(LinkedList <Ore> ores) {
+    public void setOres(List <Ore> ores) {
         this.ores = ores;
     }
     public String getClimate() {
@@ -49,10 +41,10 @@ public class Satellite {
     public void setClimate(String climate) {
         this.climate = climate;
     }
-    public LinkedList<Creatures> getCreatures() {
+    public List<Creatures> getCreatures() {
         return creatures;
     }
-    public void setCreatures(LinkedList<Creatures> creatures) {
+    public void setCreatures(List<Creatures> creatures) {
         this.creatures = creatures;
     }
 
@@ -72,7 +64,7 @@ public class Satellite {
     }
 
     public void addOre(Ore data){
-        ores.addLast(data);
+        ores.add(data);
     }
 
     public void delOreByIndex(int index) {
@@ -97,7 +89,7 @@ public class Satellite {
     }
 
     public void addCreature(Creatures data){
-        creatures.addLast(data);
+        creatures.add(data);
     }
 
     public void delCreatureByIndex(int index) {
@@ -115,8 +107,8 @@ public class Satellite {
         return ores.size();
     }
 
-    public LinkedList<Ore> getSortedOreByQuantity(){
-       LinkedList<Ore> newList;
+    public List<Ore> getSortedOreByQuantity(){
+       List<Ore> newList;
        newList = ores;
         for (int i = 0; i < ores.size(); i++) {
             for (int j = 0; j < ores.size() - 1; j++) {
@@ -133,13 +125,15 @@ public class Satellite {
     @Override
     public String toString(){
         String tempString;
-        tempString = "\tSatellite " + this.getId() + ' ' + this.getName() + " info:\n" + "\t\tClimate: " + getClimate() + "\n";
-        for (int i = 0; i < getOres().size(); i++) {
+        tempString = "\tSatellite " + this.getName() + " info:\n" + "\t\tClimate: " + getClimate() + "\n";
+        for (int i = 0; i < ores.size(); i++) {
             tempString += getOreByIndex(i).toString() + "\n";
         }
-        for (int i = 0; i < getCreatures().size(); i++) {
+        for (int i = 0; i < creatures.size(); i++) {
             tempString += getCreatureByIndex(i).toString() + "\n";
         }
         return tempString;
     }
+
+
 }
