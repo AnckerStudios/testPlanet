@@ -1,8 +1,7 @@
 package interfaces;
-
+import java.util.UUID;
 public interface CentralObject {
-    public int getId();
-    public void setId(int id);
+    public UUID getId();
     public String getName();
     public void setName(String name);
 }

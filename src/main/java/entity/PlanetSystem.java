@@ -1,43 +1,42 @@
 package entity;
 import interfaces.CentralObject;
-
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.UUID;
 
 public class PlanetSystem {
+    final private UUID id;
     private String name;
     private CentralObject centralObject;
-    private LinkedList<Satellite> planets;
+    private ArrayList<Planet> planets;
 
-    public PlanetSystem() {
-        this.name = "1";
-        this.centralObject = new Star();
-        this.planets = new LinkedList<>();
-    }
-    public PlanetSystem(String name, CentralObject centralObject, LinkedList<Satellite> planet) {
+    // Construct
+    public PlanetSystem(String name, CentralObject centralObject, ArrayList<Planet> satellites) {
+        this.id = UUID.randomUUID();
         this.name = name;
         this.centralObject = centralObject;
-        this.planets = planet;
+        this.planets = satellites;
     }
 
+    // Set n' Get
+    public UUID getId() {
+        return id;
+    }
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
     public CentralObject getCentralObject() {
         return centralObject;
     }
-
     public void setCentralObject(CentralObject centralObject) {
         this.centralObject = centralObject;
     }
-    public LinkedList <Satellite> getPlanets() {
+    public ArrayList <Planet> getPlanets() {
         return planets;
     }
-    public void setPlanets(LinkedList <Satellite> satellites) {
+    public void setPlanets(ArrayList <Planet> satellites) {
         this.planets = satellites;
     }
 
@@ -47,20 +46,20 @@ public class PlanetSystem {
     }
 
     public Satellite getPlanetByName(String name){
-        Satellite satellite = null;
+
         for (int i = 0; i < planets.size(); i++) {
-            if(planets.get(i).getName().equals(name)){
-                satellite = planets.get(i);
+            if((planets.get(i).getName()).equals(name)){
+                return planets.get(i);
             }
         }
-        return satellite;
+        return null;
     }
 
-    public Satellite setPlanetById(int id, Satellite data) {
+    public Planet setPlanetById(int id, Planet data) {
         return planets.set(id, data);
     }
 
-    public void addPlanet(Satellite data){
+    public void addPlanet(Planet data){
        planets.add(data);
     }
 
@@ -71,25 +70,32 @@ public class PlanetSystem {
     public int getAmountOfPlanets(){
         return planets.size();
     }
-    public Satellite delPlanetByName(String name) {
+
+    public Satellite delPlanetByName(String name){
         for (int i = 0; i < planets.size(); i++) {
-            if (planets.get(i).getName() == name) {
+            if(planets.get(i).getName() == name){
                 return planets.get(i);
             }
         }
         return null;
     }
 
-
-    public String toString(){
-        StringBuffer sb = new StringBuffer();
-        sb.append("Название PS: " + this.name + "\n");
-        sb.append("Центральный объект: " + this.centralObject + "\n");
-        sb.append("Спутники: \n");
-        for(Satellite s : planets)
-            sb.append(s.toString(1)+"\n");
-        return sb.toString();
+    public void addSatelliteToPlanet(String name, Satellite data){
+        for (int i = 0; i < planets.size(); i++) {
+            if((planets.get(i).getName()).equals(name)){
+                planets.get(i).addSatellite(data);
+            }
+        }
     }
 
 
+
+    public String toString() {
+        String tempString;
+        tempString = "\tPlanet System " + this.getName() +" has " + getAmountOfPlanets() + "planets. Info:\n";
+        for (int i = 0; i < planets.size(); i++) {
+            tempString += planets.get(i).toString() + "\n";
+        }
+        return tempString;
+    }
 }
