@@ -1,121 +1,39 @@
 import entity.*;
+import interfaces.CentralObject;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.*;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 public class UI {
     public static void menu() throws FileNotFoundException {
+        final Controller controller = new Controller();
+        final Scanner sc = new Scanner(System.in);
         boolean openMenu = true;
         while (openMenu) {
             System.out.println("Выберите пункт меню");
             System.out.println("1 - Создать планетарную систему");
             System.out.println("2 - Просмотреть планетарную систему");
             System.out.println("3 - Выход");
-            Yaml yaml;
-            Scanner sc = new Scanner(System.in);
-            int choice = Integer.parseInt(sc.nextLine());
-            switch (choice) {
-                case 1:
-                    PlanetSystem planetSystem = readPlanetSystem(sc);
-                    PrintWriter writer = new PrintWriter(new File(planetSystem.getName() + ".yml"));
-                    yaml = new Yaml();
-                    yaml.dump(planetSystem, writer);
-                    System.out.println("Планета создана!");
+            switch (sc.nextLine()) {
+                case "1":
+                    readPlanetSystem(sc);
                     break;
-                case 2:
+                case "2":
                     System.out.println("Введите название планетарной системы\n");
-                    String namePlanetSystem = sc.nextLine();
-                    File file = new File(namePlanetSystem + ".yml");
-                    if (file.exists()) {
-                        InputStream inputStream = new FileInputStream(file);
-                        yaml = new Yaml();
-                        PlanetSystem data = yaml.load(inputStream);
-                        menuPlanetSystem(sc, data);
-                    } else {
-                        System.out.println("Такую систему еще не открыли");
-                    }
+                    menuPlanetSystem(sc, controller, controller.read(sc.nextLine()));
                     break;
-                case 3:
+                case "3":
                     openMenu = false;
                     break;
             }
         }
     }
-    public static void menuSatillite(Scanner sc, Satillite selectedSatillite){
-        boolean openMenu = true;
-        while (openMenu) {
-            System.out.println(selectedSatillite);
-            System.out.println("=========================");
-            System.out.println("1 - Изменить содержание руд ");
-            if(selectedSatillite instanceof Planet) {
-                System.out.println("2 - Добавить спутник");
-                System.out.println("3 - Удалить спутник");
-                System.out.println("4 - Просмотреть спутник");
-            }
-            System.out.println("0 - Вернуться");
-            int choice = Integer.parseInt(sc.nextLine());
-            switch (choice) {
-                case 1:
-                    menuOres(sc, selectedSatillite);
-                    break;
-                case 2:
-                    if(selectedSatillite instanceof Planet) {
-                        ((Planet) selectedSatillite).addSatellite(readSatillite(sc));
-                    }
-                    break;
-                case 3:
-                    if(selectedSatillite instanceof Planet) {
-                        System.out.println("Введите номер спутника");
-                        int number = Integer.parseInt(sc.nextLine());
-                        ((Planet) selectedSatillite).delSatelliteById(number);
-                    }
-                    break;
-                case 4:
-                    if(selectedSatillite instanceof Planet) {
-                        System.out.println("Введите название спутника\n");
-                        String nameSatillite = sc.nextLine();
-                        //menuSatillite(planet.getSatilliteByName(nameSatillite));
-                        System.out.println("Пока нет");
-                    }
-                    break;
-                case 0:
-                    openMenu = false;
-                    break;
-            }
-        }
-    }
-    public static void menuOres(Scanner sc, Satillite selectedSatillite){
-        boolean openMenu = true;
-        while (openMenu) {
-            System.out.println(selectedSatillite.getOres());
-            System.out.println("=========================");
-            System.out.println("1 - Добавить руду ");
-            System.out.println("2 - Удалить руду");
-            System.out.println("3 - Изменить колличество руды");
-            System.out.println("4 - Вернуться");
-            int choice = Integer.parseInt(sc.nextLine());
-            switch (choice) {
-                case 1:
-                    System.out.println("Пока нет");
-                    //selectedSatillite.addOre(readOre());
-                    break;
-                case 2:
-                    System.out.println("Пока нет");
-                    break;
-                case 3:
-                    System.out.println("Пока нет");
-                    break;
-                case 4:
-                    openMenu = false;
-                    break;
-            }
-        }
-    }
-    public static void menuPlanetSystem(Scanner sc, PlanetSystem planetSystem){
-        boolean openPSMenu = true;
-        while(openPSMenu) {
+
+    public static void menuPlanetSystem(Scanner sc, Controller controller, PlanetSystem planetSystem) throws FileNotFoundException {
+        while(true) {
             System.out.println(planetSystem);
             System.out.println("=========================");
             System.out.println("1 - Добавить объект");
@@ -125,106 +43,200 @@ public class UI {
             int choice = Integer.parseInt(sc.nextLine());
             switch (choice) {
                 case 1:
-                    System.out.println("Выберит тип небесного тела");
-                    System.out.println("planet / satillite");
-                    String classSatillite = sc.nextLine();
-                    if (classSatillite.equals("planet")) {
-                        planetSystem.addPlanet(readPlanet(sc));
-                    } else {
-                        planetSystem.addPlanet(readSatillite(sc));
-                    }
+                    controller.addPlanet(readSatelliteType(sc), planetSystem);
                     break;
                 case 2:
-                    System.out.println("Введите название небесного тела или его номер\n");
-                    String nameDelPlanet = sc.nextLine();
-                    if(nameDelPlanet.matches("[-+]?\\d+"))
-                        planetSystem.delPlanetById(Integer.parseInt(nameDelPlanet));
-                    else
-                        System.out.println("по имени пока нет");
+                    System.out.println("Введите название небесного тела\n");
+                    controller.delPlanet(sc.nextLine(), planetSystem);
                     break;
                 case 3:
                     System.out.println("Введите название небесного тела или его номер\n");
-                    String nameSelectedPlanet = sc.nextLine();
-                    Satillite selectedPlanet = null; //добавить получение планеты
-                    menuSatillite(sc, selectedPlanet);
-
+                    menuSatillite(sc,controller, planetSystem.getPlanetByName(sc.nextLine()));
                     break;
                 case 4:
-                    openPSMenu = false;
-                    break;
+                    controller.save(planetSystem);
+                    return;
             }
         }
     }
-
-    public static Star readStar (Scanner sc){
-        System.out.println("Введите название звезды");
-        String nameStar = sc.nextLine();
-        Star star = new Star(nameStar);
-        return star;
-    }
-    public static BlackHole readBlackHole (Scanner sc){
-        System.out.println("Введите название черной дыры");
-        String nameStar = sc.nextLine();
-        BlackHole blackHole = new BlackHole(nameStar);
-        return blackHole;
-    }
-    public static Planet readPlanet (Scanner sc){
-        System.out.println("Введите название планеты");
-        String nameSatillite = sc.nextLine();
-        System.out.println("Введите кол-во руд");
-        int oreSize = Integer.parseInt(sc.nextLine());
-        Ore[] ores = new Ore[oreSize];
-        for(int i = 0; i < oreSize; i++){
-            ores[i] = readOre(sc);
+    public static void menuSatillite(Scanner sc, Controller controller, Satellite selectedSatillite){
+        while (true) {
+            System.out.println(selectedSatillite.toString(1));
+            System.out.println("=========================");
+            System.out.println("1 - Просмотреть руды ");
+            System.out.println("2 - Просмотреть живность ");
+            if(selectedSatillite instanceof Planet) {
+                System.out.println("3 - Добавить спутник");
+                System.out.println("4 - Удалить спутник");
+                System.out.println("5 - Просмотреть спутник");
+            }
+            System.out.println("0 - Вернуться");
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    menuOres(sc,controller, selectedSatillite);
+                    break;
+                case 2:
+                    menuCreatures(sc,controller, selectedSatillite);
+                    break;
+                case 3:
+                    if(selectedSatillite instanceof Planet)
+                        controller.addSatellite(readSatillite(sc), (Planet) selectedSatillite);
+                    break;
+                case 4:
+                    if(selectedSatillite instanceof Planet) {
+                        System.out.println("Введите номер спутника");
+                        controller.delSatellite(Integer.parseInt(sc.nextLine()), (Planet) selectedSatillite);
+                    }
+                    break;
+                case 5:
+                    if(selectedSatillite instanceof Planet) {
+                        System.out.println("Введите название спутника\n");
+                        menuSatillite(sc,controller,((Planet) selectedSatillite).getSatelliteByName(sc.nextLine()));
+                    }
+                    break;
+                case 0:
+                    return;
+            }
         }
-        System.out.println("Введите кол-во спутников");
-        int satilliteSize = Integer.parseInt(sc.nextLine());
-        Satillite[] satillites = new Satillite[satilliteSize];
-        for(int i = 0; i < satilliteSize; i++){
-            satillites[i] = readSatillite(sc);
-        }
-        Planet planet = new Planet(nameSatillite, ores, satillites);
-        return planet;
     }
-    public static Satillite readSatillite (Scanner sc){
-        System.out.println("Введите название спутника");
-        String nameSatillite = sc.nextLine();
-        System.out.println("Введите кол-во руд");
-        int oreSize = Integer.parseInt(sc.nextLine());
-        Ore[] ores = new Ore[oreSize];
-        for(int i = 0; i < oreSize; i++){
-            ores[i] = readOre(sc);
+    public static void menuOres(Scanner sc, Controller controller, Satellite selectedSatillite){
+        while (true) {
+            for(Ore o : selectedSatillite.getOres())
+                System.out.println(o.toString(1));
+            System.out.println("=========================");
+            System.out.println("1 - Добавить руду ");
+            System.out.println("2 - Удалить руду");
+            System.out.println("3 - Изменить руду");
+            System.out.println("4 - Вернуться");
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    controller.addOre(readOre(sc), selectedSatillite);
+                    break;
+                case 2:
+                    System.out.println("Введите номер руды");
+                    controller.delOre(Integer.parseInt(sc.nextLine()), selectedSatillite);
+                    break;
+                case 3:
+                    controller.setOre(Integer.parseInt(sc.nextLine()), readOre(sc), selectedSatillite);
+                    break;
+                case 4:
+                    return;
+            }
         }
-        Satillite satillite = new Satillite(nameSatillite, ores);
-        return satillite;
+    }
+    public static void menuCreatures(Scanner sc, Controller controller, Satellite selectedSatillite){
+        while (true) {
+            for(Creatures o : selectedSatillite.getCreatures())
+                System.out.println(o.toString(1));
+            System.out.println("=========================");
+            System.out.println("1 - Добавить живность ");
+            System.out.println("2 - Удалить живность ");
+            System.out.println("3 - Изменить живность ");
+            System.out.println("4 - Вернуться");
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    controller.addCreatures(readCreatures(sc), selectedSatillite);
+                    break;
+                case 2:
+                    System.out.println("Введите номер руды");
+                    controller.delCreatures(Integer.parseInt(sc.nextLine()), selectedSatillite);
+                    break;
+                case 3:
+                    controller.setCreatures(Integer.parseInt(sc.nextLine()), readCreatures(sc), selectedSatillite);
+                    break;
+                case 4:
+                    return;
+            }
+        }
     }
     public static PlanetSystem readPlanetSystem(Scanner sc){
         System.out.println("Введите название новой планетарной системы\n");
         String name = sc.nextLine();
+        CentralObject c = readCentralObject(sc);
+        System.out.println("Введите кол-во небесных тел");
+        int satilliteCount = Integer.parseInt(sc.nextLine());
+        LinkedList<Satellite> satillites = new LinkedList();
+        for(int i = 0; i < satilliteCount; i++){
+            satillites.add(readSatelliteType(sc));
+        }
+        return new PlanetSystem(name, c, satillites);
+    }
+    public static CentralObject readCentralObject(Scanner sc){
         System.out.println("Выберит тип центрального объекта");
         System.out.println("star / black hole");
         String classCentralObject = sc.nextLine();
-        CentralObject c;
         if(classCentralObject.equals("star")){
-            c = readStar(sc);
+            return readStar(sc);
         } else {
-            c = readBlackHole(sc);
+            return readBlackHole(sc);
         }
-        System.out.println("Введите кол-во небесных тел");
+    }
+    public static Star readStar (Scanner sc){
+        System.out.println("Введите название звезды");
+        String nameStar = sc.nextLine();
+        return new Star(nameStar);
+    }
+    public static BlackHole readBlackHole (Scanner sc){
+        System.out.println("Введите название черной дыры");
+        String nameStar = sc.nextLine();
+        return new BlackHole(nameStar);
+    }
+    public static Satellite readSatelliteType(Scanner sc){
+        System.out.println("Выберит тип небесного тела");
+        System.out.println("planet / satillite");
+        String classSatillite = sc.nextLine();
+        if(classSatillite.equals("planet")){
+            return readPlanet(sc);
+        } else {
+            return readSatillite(sc);
+        }
+    }
+    public static Satellite readSatillite (Scanner sc){
+        System.out.println("Введите название спутника");
+        String nameSatillite = sc.nextLine();
+        System.out.println("Введите его климат");
+        String climate = sc.nextLine();
+        System.out.println("Введите кол-во руд");
+        int oreSize = Integer.parseInt(sc.nextLine());
+        LinkedList<Ore> ores = new LinkedList<>();
+        for(int i = 0; i < oreSize; i++){
+            ores.add(readOre(sc));
+        }
+        System.out.println("Введите кол-во живности");
+        int creaturesSize = Integer.parseInt(sc.nextLine());
+        LinkedList<Creatures> creatures = new LinkedList<>();
+        for(int i = 0; i < creaturesSize; i++){
+            creatures.add(readCreatures(sc));
+        }
+        return new Satellite(nameSatillite,climate,creatures,ores);
+    }
+    public static Planet readPlanet (Scanner sc){
+        System.out.println("Введите название планеты");
+        String nameSatillite = sc.nextLine();
+        System.out.println("Введите его климат");
+        String climate = sc.nextLine();
+        System.out.println("Введите кол-во руд");
+        int oreSize = Integer.parseInt(sc.nextLine());
+        LinkedList<Ore> ores = new LinkedList();
+        for(int i = 0; i < oreSize; i++){
+            ores.add(readOre(sc));
+        }
+        System.out.println("Введите кол-во живности");
+        int creaturesSize = Integer.parseInt(sc.nextLine());
+        LinkedList<Creatures> creatures = new LinkedList<>();
+        for(int i = 0; i < creaturesSize; i++){
+            creatures.add(readCreatures(sc));
+        }
+        System.out.println("Введите кол-во спутников");
         int satilliteSize = Integer.parseInt(sc.nextLine());
-        Satillite[] satillites = new Satillite[satilliteSize];
+        LinkedList<Satellite> satillites = new LinkedList();
         for(int i = 0; i < satilliteSize; i++){
-            System.out.println("Выберит тип небесного тела");
-            System.out.println("planet / satillite");
-            String classSatillite = sc.nextLine();
-            if(classSatillite.equals("planet")){
-                satillites[i] = readPlanet(sc);
-            } else {
-                satillites[i] = readSatillite(sc);
-            }
-
+            satillites.add(readSatillite(sc));
         }
-        return new PlanetSystem(name, c, satillites);
+        return new Planet(nameSatillite,climate,creatures, ores, satillites);
     }
     public static Ore readOre(Scanner sc){
         System.out.println("Введите название руды");
@@ -232,5 +244,12 @@ public class UI {
         System.out.println("Введите её содержание");
         int oreValue = Integer.parseInt(sc.nextLine());
         return new Ore(oreName, oreValue);
+    }
+    public static Creatures readCreatures(Scanner sc){
+        System.out.println("Введите название живности");
+        String creatureName = sc.nextLine();
+        System.out.println("Введите её тип");
+        String creatureType = sc.nextLine();
+        return new Creatures(creatureName, creatureType);
     }
 }

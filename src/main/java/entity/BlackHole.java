@@ -1,6 +1,8 @@
 package entity;
 
-public class BlackHole implements CentralObject{
+import interfaces.CentralObject;
+
+public class BlackHole implements CentralObject {
     private int id;
     private String name;
 

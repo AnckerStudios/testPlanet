@@ -24,7 +24,6 @@ public class Ore {
     public int getQuantity() {
         return quantity;
     }
-
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
@@ -35,5 +34,24 @@ public class Ore {
         StringBuffer sb = new StringBuffer();
         sb.append(tab+ this.name + " / " + this.quantity + "\n");
         return sb.toString();
+    }
+
+
+    // Methods
+    @Override
+    public String toString(){
+        String tempString;
+        tempString = "\t\tOre: " + this.getName() + " | Quantity: " + this.getQuantity();
+        return tempString;
+    }
+    @Override
+    public boolean equals(Object obj){
+        if(!(obj instanceof Ore) ) return false;
+        if(this.getName() == ((Ore) obj).getName() && this.getQuantity() == ((Ore) obj).getQuantity()) return true;
+        else return false;
+    }
+    @Override
+    public Object clone() throws CloneNotSupportedException{
+        return super.clone();
     }
 }

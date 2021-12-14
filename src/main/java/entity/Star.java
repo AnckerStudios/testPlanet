@@ -1,6 +1,8 @@
 package entity;
 
-public class Star implements CentralObject{
+import interfaces.CentralObject;
+
+public class Star implements CentralObject {
     private int id;
     private String name;
     public Star() {
