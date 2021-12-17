@@ -36,7 +36,6 @@ public class Ore {
         return sb.toString();
     }
 
-
     // Methods
     @Override
     public String toString(){

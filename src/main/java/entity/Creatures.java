@@ -5,6 +5,10 @@ public class Creatures {
     private String type;
 
     // Construct
+    public Creatures() {
+        this.name = "1";
+        this.type = "1";
+    }
     public Creatures(String name, String type) {
         this.name = name;
         this.type = type;

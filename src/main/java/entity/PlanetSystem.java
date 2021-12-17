@@ -3,20 +3,31 @@ import interfaces.CentralObject;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class PlanetSystem {
+public class PlanetSystem{
     final private UUID id;
     private String name;
     private CentralObject centralObject;
-    private ArrayList<Planet> planets;
+    private ArrayList<Satellite> planets;
 
+    public PlanetSystem() {
+        this.id = UUID.randomUUID();
+        this.name = "1";
+        this.centralObject = new Star();
+        this.planets = new ArrayList<>();
+    }
     // Construct
-    public PlanetSystem(String name, CentralObject centralObject, ArrayList<Planet> satellites) {
+    public PlanetSystem(String name, CentralObject centralObject, ArrayList<Satellite> satellites) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.centralObject = centralObject;
         this.planets = satellites;
     }
-
+    public PlanetSystem(UUID id, String name, CentralObject centralObject, ArrayList<Satellite> satellites) {
+        this.id = id;
+        this.name = name;
+        this.centralObject = centralObject;
+        this.planets = satellites;
+    }
     // Set n' Get
     public UUID getId() {
         return id;
@@ -33,10 +44,10 @@ public class PlanetSystem {
     public void setCentralObject(CentralObject centralObject) {
         this.centralObject = centralObject;
     }
-    public ArrayList <Planet> getPlanets() {
+    public ArrayList <Satellite> getPlanets() {
         return planets;
     }
-    public void setPlanets(ArrayList <Planet> satellites) {
+    public void setPlanets(ArrayList <Satellite> satellites) {
         this.planets = satellites;
     }
 
@@ -55,12 +66,16 @@ public class PlanetSystem {
         return null;
     }
 
-    public Planet setPlanetById(int id, Planet data) {
+    public Satellite setPlanetById(int id, Satellite data) {
         return planets.set(id, data);
     }
 
-    public void addPlanet(Planet data){
-       planets.add(data);
+    public void addPlanet(Satellite data){
+        planets.add(data);
+    }
+
+    public void addPlanetById(int id,Satellite data){
+        planets.add(id, data);
     }
 
     public void delPlanetById(int id) {
@@ -71,31 +86,29 @@ public class PlanetSystem {
         return planets.size();
     }
 
-    public Satellite delPlanetByName(String name){
-        for (int i = 0; i < planets.size(); i++) {
-            if(planets.get(i).getName() == name){
-                return planets.get(i);
-            }
-        }
-        return null;
-    }
-
-    public void addSatelliteToPlanet(String name, Satellite data){
+    public void delPlanetByName(String name){
         for (int i = 0; i < planets.size(); i++) {
             if((planets.get(i).getName()).equals(name)){
-                planets.get(i).addSatellite(data);
+                planets.remove(i);
             }
         }
     }
 
-
-
-    public String toString() {
-        String tempString;
-        tempString = "\tPlanet System " + this.getName() +" has " + getAmountOfPlanets() + "planets. Info:\n";
+    /*public void addSatelliteToPlanet(String name, Satellite data){
         for (int i = 0; i < planets.size(); i++) {
-            tempString += planets.get(i).toString() + "\n";
+            if((planets.get(i).getName()).equals(name)){
+                (Planet)(planets.get(i).addSatellite(data);
+            }
         }
-        return tempString;
+    }*/
+
+    public String toString(){
+        StringBuffer sb = new StringBuffer();
+        sb.append("Название PS: " + this.name + "\n");
+        sb.append("Центральный объект: " + this.centralObject + "\n");
+        sb.append("Спутники: \n");
+        for(Satellite s : planets)
+            sb.append(s.toString(1)+"\n");
+        return sb.toString();
     }
 }

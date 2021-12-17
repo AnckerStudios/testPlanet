@@ -1,5 +1,7 @@
 package entity;
 import exceptions.*;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,14 +11,24 @@ public class Satellite {
     private String climate;
     protected List <Creatures> creatures;
     protected List <Ore> ores;
+    private int radius;
 
     // Construct
-    public Satellite(String name, String climate, List<Creatures> creatures, List <Ore> ores) {
+    public Satellite() {
+        this.id = UUID.randomUUID();
+        this.name = "1";
+        this.ores = new ArrayList<>();
+        this.climate = "1";
+        this.creatures = new ArrayList<>();
+        this.radius = 1;
+    }
+    public Satellite(String name, String climate, List<Creatures> creatures, List <Ore> ores, int radius) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.ores = ores;
         this.climate = climate;
         this.creatures = creatures;
+        this.radius = radius;
     }
 
     // Set n' Get
@@ -34,6 +46,54 @@ public class Satellite {
     }
     public void setOres(List <Ore> ores) {
         this.ores = ores;
+    }
+    public Ore getOreByName(String name){
+        for (int i = 0; i < ores.size(); i++) {
+            if(ores.get(i).getName().equals(name)){
+                return ores.get(i);
+            }
+        }
+        return null;
+    }
+
+    public Creatures getCreaturesByName(String name){
+        for (int i = 0; i < ores.size(); i++) {
+            if(creatures.get(i).getName().equals(name)){
+                return creatures.get(i);
+            }
+        }
+        return null;
+    }
+    public void setOreByName(String name, Ore data){
+        for (int i = 0; i < ores.size(); i++) {
+            if(ores.get(i).getName().equals(name)) {
+                ores.set(i, data);
+            }
+        }
+    }
+
+    public void setCreatureByName(String name, Creatures data){
+        for (int i = 0; i < creatures.size(); i++) {
+            if(creatures.get(i).getName().equals(name)) {
+                creatures.set(i, data);
+            }
+        }
+    }
+
+    public void delOreByName(String name){
+        for (int i = 0; i < ores.size(); i++) {
+            if(ores.get(i).getName().equals(name)){
+                ores.remove(i);
+            }
+        }
+    }
+
+    public void delCreatureByName(String name){
+        for (int i = 0; i < creatures.size(); i++) {
+            if(creatures.get(i).getName().equals(name)){
+                creatures.remove(i);
+            }
+        }
     }
     public String getClimate() {
         return climate;
@@ -121,7 +181,20 @@ public class Satellite {
         }
        return newList;
     }
-
+    public String toString(int offset){
+        String tab = "\t";
+        for(int i = 1; i < offset; i++)
+            tab = tab+"\t";
+        StringBuffer sb = new StringBuffer();
+        sb.append(tab+"Объект : " + this.name + "\n");
+        sb.append(tab+"\tРуды : \n");
+        for(Ore o : getOres())
+            sb.append(o.toString(offset+2));
+        sb.append(tab+"\tЖивность : \n");
+        for(Creatures o : getCreatures())
+            sb.append(o.toString(offset+2));
+        return sb.toString();
+    }
     @Override
     public String toString(){
         String tempString;
@@ -136,4 +209,11 @@ public class Satellite {
     }
 
 
+    public int getRadius() {
+        return radius;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
 }

@@ -8,6 +8,10 @@ public class Star implements CentralObject {
     private String name;
 
     // Construct
+    public Star() {
+        this.id = UUID.randomUUID();
+        this.name = "1";
+    }
     public Star(String name) {
         this.id = UUID.randomUUID();
         this.name = name;
@@ -22,5 +26,10 @@ public class Star implements CentralObject {
     }
     public void setName(String name) {
         this.name = name;
+    }
+    public String toString(){
+        StringBuffer sb = new StringBuffer();
+        sb.append(this.name);
+        return sb.toString();
     }
 }
