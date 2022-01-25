@@ -3,12 +3,30 @@ import interfaces.CentralObject;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Scanner;
-import java.util.UUID;
+import java.sql.*;
+import java.util.*;
 
 public class Controller {
+    private String url = "jdbc:postgresql://localhost:5432/testbd";
+    private String user = "postgres";
+    private String pass = "111";
+    private Connection conn = null;
+    private Statement stat = null;
+
+    public Controller() {
+
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection(url, user, pass);
+
+            stat = conn.createStatement();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     /*public void add(Object o1, Object o2){
         if(o2 instanceof PlanetSystem)
             ((PlanetSystem) o2).addPlanet((Satellite) o1);
@@ -21,43 +39,124 @@ public class Controller {
                 ((Satellite) o2).addCreature((Creatures) o1);
         }
     }*/
-    public void delPlanet(String planetName, PlanetSystem planetSystem){
+    public void delPlanet(String planetName, PlanetSystem planetSystem) {
+        try {
+            stat.executeUpdate("DELETE FROM spaceobj WHERE name_sat = '" + planetName + "'");
+            stat.executeUpdate("DELETE FROM satellite_ore WHERE satellite_id = '" + planetSystem.getPlanetByName(planetName).getId() + "'");
+            stat.executeUpdate("DELETE FROM satellite_creatures WHERE satellite_id = '" + planetSystem.getPlanetByName(planetName).getId() + "'");
+            for (Satellite s : ((Planet) planetSystem.getPlanetByName(planetName)).getSatellite()) {
+                stat.executeUpdate("DELETE FROM spaceobj WHERE name_sat = '" + s.getName() + "'");
+                stat.executeUpdate("DELETE FROM satellite_ore WHERE satellite_id = '" + s.getId() + "'");
+                stat.executeUpdate("DELETE FROM satellite_creatures WHERE satellite_id = '" + s.getId() + "'");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         planetSystem.delPlanetByName(planetName);
+
     }
-    public void addPlanet(Satellite planet, PlanetSystem planetSystem){
+
+    public void addPlanet(Satellite planet, PlanetSystem planetSystem) {
         planetSystem.addPlanet(planet);
         try {
-            savePlanet(planet);
+            if (planet instanceof Planet)
+                addPlanetToPS(planetSystem, (Planet) planet);
+            else
+                addSatelliteToPS(planetSystem, planet);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
-    public void delSatellite(int satelliteIndex, Planet planet){
-        planet.delSatelliteById(satelliteIndex);
+
+    public void delSatellite(int satelliteIndex, Planet planet) {
+        try {
+            stat.executeUpdate("DELETE FROM spaceobj WHERE name_sat = '" + planet.getSatelliteById(satelliteIndex).getName() + "'");
+            stat.executeUpdate("DELETE FROM satellite_ore WHERE satellite_id = '" + planet.getSatelliteById(satelliteIndex).getId() + "'");
+            stat.executeUpdate("DELETE FROM satellite_creatures WHERE satellite_id = '" + planet.getSatelliteById(satelliteIndex).getId() + "'");
+            planet.delSatelliteById(satelliteIndex);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
-    public void addSatellite(Satellite satellite, Planet planet){
-        planet.addSatellite(satellite);
+
+    public void addSatellite(PlanetSystem planetSystem, Satellite satellite, Planet planet) {
+        try {
+            addSatelliteToPlanet(planetSystem, planet, satellite);
+            planet.addSatellite(satellite);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
+
     public void delOre(String oreName, Satellite satellite) {
-        satellite.delOreByName(oreName);
+        try {
+            stat.executeUpdate("DELETE FROM satellite_ore WHERE ore_id = '" + satellite.getOreByName(oreName).getId() + "'");
+            satellite.delOreByName(oreName);
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+        }
     }
-    public void addOre(Ore ore, Satellite satellite){
+
+    public void addOre(Ore ore, Satellite satellite) {
+        try {
+            ResultSet result = stat.executeQuery("SELECT * FROM ore where name_ore = '" + ore.getName() + "'");
+            if (!result.next())
+                stat.executeUpdate("insert into ore values (" + ore.getId() + "," + "'" + ore.getName() + "'");
+            stat.executeUpdate("insert into satellite_ore values (" + satellite.getId() + "," + "'" + ore.getId() + "'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         satellite.addOre(ore);
     }
-    public void setOre(String oreName,Ore ore, Satellite satellite){
+
+    public void setOre(String oreName, Ore ore, Satellite satellite) {
         satellite.setOreByName(oreName, ore);
     }
+
     public void delCreatures(String creaturesName, Satellite satellite) {
+        try {
+            stat.executeUpdate("DELETE FROM satellite_creatures WHERE creature_id = '" + satellite.getCreaturesByName(creaturesName).getId() + "'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         satellite.delCreatureByName(creaturesName);
     }
-    public void addCreatures(Creatures creatures, Satellite satellite){
+
+    public void addCreatures(Creatures creatures, Satellite satellite) {
+        try {
+            ResultSet result = stat.executeQuery("SELECT * FROM creature where name_cre = '" + creatures.getName() + "'");
+            if (!result.next())
+                stat.executeUpdate("insert into ore values (" + creatures.getId() + "," + "'" + creatures.getName() + "'," + "'" + creatures.getType() + "'");
+            stat.executeUpdate("insert into satellite_ore values (" + satellite.getId() + "," + "'" + creatures.getId() + "'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         satellite.addCreature(creatures);
     }
-    public void setCreatures(String creaturesName,Creatures creatures, Satellite satellite){
+
+    public void setCreatures(String creaturesName, Creatures creatures, Satellite satellite) {
         satellite.setCreatureByName(creaturesName, creatures);
     }
-    public void save2(PlanetSystem planetSystem) throws FileNotFoundException {
-        PrintWriter writer = new PrintWriter(new File(planetSystem.getName() + ".yml"));
+
+    public void addPlanetSystem(PlanetSystem planetSystem) throws FileNotFoundException {
+        try {
+            int rows = stat.executeUpdate("insert into planetSystem values (8,'" + planetSystem.getName() + "')");
+            addCentralObj(planetSystem, planetSystem.getCentralObject());
+            for (Satellite s : planetSystem.getPlanets()) {
+                if (s instanceof Planet)
+                    addPlanetToPS(planetSystem, (Planet) s);
+                else
+                    addSatelliteToPS(planetSystem, s);
+            }
+
+            System.out.println(rows);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        /*PrintWriter writer = new PrintWriter(new File(planetSystem.getName() + ".yml"));
         Yaml yaml = new Yaml();
         PlanetSystemSaveTest psst = new PlanetSystemSaveTest();
         psst.setSaveTest(planetSystem);
@@ -65,26 +164,90 @@ public class Controller {
         yaml.dump(psst, writer);
         saveCentralObj(planetSystem.getCentralObject());
         for(Satellite s : planetSystem.getPlanets())
-            savePlanet(s);
+            savePlanet(s);*/
     }
-    public void save(PlanetSystem planetSystem) throws FileNotFoundException {
+
+    public void updatePlanetSystem(PlanetSystem planetSystem) throws FileNotFoundException {
+        try {
+            int rows = stat.executeUpdate("update planetSystem set name_ps = '" + planetSystem.getName() + "' where id_ps = '" + planetSystem.getId() + "'");
+            System.out.println(rows);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*public void save(PlanetSystem planetSystem) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(new File(planetSystem.getName() + ".yml"));
         Yaml yaml = new Yaml();
         yaml.dump(planetSystem, writer);
-    }
+    }*/
     public PlanetSystem read2(String namePlanetSystem) throws FileNotFoundException {
-        File file = new File(namePlanetSystem + ".yml");
-        //PlanetSystem data = null;
-        PlanetSystemSaveTest psst = null;
-        if (file.exists()) {
-            InputStream inputStream = new FileInputStream(file);
-            Yaml yaml = new Yaml();
-            psst = yaml.load(inputStream);
+        try {
+            ArrayList<Satellite> satellites = new ArrayList<>();
+            ResultSet result = stat.executeQuery("SELECT * FROM spaceobj inner join planetSystem on id_ps = fk_planetsystem_id where name_ps = '" + namePlanetSystem + "' and fk_planet_id is NULL");
+            while (result.next()) {
+                int id = result.getInt("id_sat");
+                System.out.println(id);
+                String name = result.getString("name_sat");
+                String climate = result.getString("climate");
+                String discriminator = result.getString("discriminator");
+                if (discriminator.equals("planet"))
+                    satellites.add(new Planet(name, climate, id));
+                else
+                    satellites.add(new Satellite(name, climate, id));
+            }
+            for (Satellite s : satellites) {
+                ResultSet oresResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'");
+                List<Ore> ores = new ArrayList<>();
+                while (oresResult.next()) {
+                    ores.add(new Ore(oresResult.getString("name_ore"), 1));
+                }
+                s.addOreArr(ores);
+                ResultSet creaturesResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'");
+                List<Creatures> creatures = new ArrayList<>();
+                while (creaturesResult.next()) {
+                    creatures.add(new Creatures(creaturesResult.getString("name_cre"), creaturesResult.getString("type_cre")));
+                }
+                s.addCreatureArr(creatures);
+                if (s instanceof Planet) {
+                    ArrayList<Satellite> planetSat = new ArrayList<>();
+                    System.out.println(s.getIdSat());
+                    ResultSet planetSatResult = stat.executeQuery("select * from spaceobj where fk_planet_id = " + s.getIdSat());
+                    while (planetSatResult.next()) {
+                        int id = planetSatResult.getInt("id_sat");
+                        String name = planetSatResult.getString("name_sat");
+                        String climate = planetSatResult.getString("climate");
+                        planetSat.add(new Satellite(name, climate, id));
+                    }
+                    for (Satellite plSat : planetSat) {
+                        ResultSet oresSatResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
+                        List<Ore> oresSat = new ArrayList<>();
+                        while (oresSatResult.next()) {
+                            oresSat.add(new Ore(oresSatResult.getString("name_ore"), 1));
+                        }
+                        plSat.addOreArr(oresSat);
+                        ResultSet creaturesSatResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
+                        List<Creatures> creaturesSat = new ArrayList<>();
+                        while (creaturesSatResult.next()) {
+                            creaturesSat.add(new Creatures(creaturesSatResult.getString("name_cre"), creaturesSatResult.getString("type_cre")));
+                        }
+                        plSat.addCreatureArr(creaturesSat);
+                    }
+                    ((Planet) s).addSatelliteArr(planetSat);
+                }
+            }
+            CentralObject centralObject = null;
+            ResultSet centralObjResult = stat.executeQuery("select * from centralObject inner join planetSystem on id_ps = fk_planetsystem_id where name_ps = '" + namePlanetSystem + "'");
+            if (centralObjResult.next())
+                centralObject = new Star(centralObjResult.getString("name_co"));
+            return new PlanetSystem(namePlanetSystem, centralObject, satellites);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        PlanetSystem data = new PlanetSystem(psst.getId(), psst.getName() ,loadCentralObj(psst.getCentralObject()),loadArrayPlanets(psst.getPlanets()));
-        return data;
+        return null;
     }
-    public PlanetSystem read(String namePlanetSystem) throws FileNotFoundException {
+
+    /*public PlanetSystem read(String namePlanetSystem) throws FileNotFoundException {
         File file = new File(namePlanetSystem + ".yml");
         PlanetSystem data = null;
         if (file.exists()) {
@@ -93,34 +256,112 @@ public class Controller {
             data = yaml.load(inputStream);
         }
         return data;
-    }
-    public void savePlanet(Satellite planet) throws FileNotFoundException {
-        PrintWriter writer = new PrintWriter(new File("planet/"+planet.getId() + ".yml"));
-        Yaml yaml = new Yaml();
-        yaml.dump(planet, writer);
-    }
-    public Satellite loadPlanet(UUID namePlanet) throws FileNotFoundException {
-        File file = new File("planet/"+namePlanet + ".yml");
-        Satellite data = null;
-        if (file.exists()) {
-            InputStream inputStream = new FileInputStream(file);
-            Yaml yaml = new Yaml();
-            data = yaml.load(inputStream);
+    }*/
+    public void addSatelliteToPlanet(PlanetSystem planetSystem, Planet planet, Satellite satellite) throws FileNotFoundException {
+        try {
+            int rows = stat.executeUpdate("insert into spaceobj values (" + planet.getId() + "," +
+                    "'" + satellite.getClass().getSimpleName().toLowerCase(Locale.ROOT) + "'," +
+                    "'" + satellite.getName() + "')," +
+                    "'" + satellite.getClimate() + "', '" + planet.getId() + "' , '" + planetSystem.getId() + "'");
+            for (Ore o : satellite.getOres())
+                addOre(o, satellite);
+            for (Creatures c : satellite.getCreatures())
+                addCreatures(c, satellite);  //////////////////тут раньше был отдельный класс на добавление в бд а сейчас с добавлением в модель
+            System.out.println(rows);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return data;
     }
-    public ArrayList<Satellite> loadArrayPlanets(ArrayList<UUID> namePlanet) throws FileNotFoundException {
-        ArrayList<Satellite> data = new ArrayList<>();
-        for(UUID uu : namePlanet)
-            data.add(loadPlanet(uu));
-        return data;
+
+    public void addPlanetToPS(PlanetSystem planetSystem, Planet planet) throws FileNotFoundException {
+        try {
+
+            int rows = stat.executeUpdate("insert into spaceobj values (" + planet.getId() + "," +
+                    "'" + planet.getClass().getSimpleName().toLowerCase(Locale.ROOT) + "'," +
+                    "'" + planet.getName() + "')," +
+                    "'" + planet.getClimate() + "', null , '" + planetSystem.getId() + "'");
+            for (Ore o : planet.getOres())
+                addOre(o, planet);  //////////тут так же был 2-й класс
+            for (Creatures c : planet.getCreatures())
+                addCreatures(c, planet);
+            for (Satellite s : planet.getSatellite())
+                addSatelliteToPlanet(planetSystem, planet, s);
+
+            System.out.println(rows);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
+
+    public void addSatelliteToPS(PlanetSystem planetSystem, Satellite planet) throws FileNotFoundException {
+        try {
+
+            int rows = stat.executeUpdate("insert into spaceobj values (" + planet.getId() + "," +
+                    "'" + planet.getClass().getSimpleName().toLowerCase(Locale.ROOT) + "'," +
+                    "'" + planet.getName() + "')," +
+                    "'" + planet.getClimate() + "', null , '" + planetSystem.getId() + "'");
+            for (Ore o : planet.getOres())
+                addOre(o, planet);
+            for (Creatures c : planet.getCreatures())
+                addCreatures(c, planet);
+            System.out.println(rows);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*public void addOreToSat(Satellite satellite, Ore ore) throws FileNotFoundException {
+        try {
+            ResultSet result = stat.executeQuery("SELECT * FROM ore where name_ore = '"+ore.getName()+"'");
+            if(!result.next())
+                stat.executeUpdate("insert into ore values ("+ore.getId()+"," + "'"+ore.getName()+"'");
+            stat.executeUpdate("insert into satellite_ore values ("+satellite.getId()+"," + "'"+ore.get+"'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }*/
+    /*public void addCreatureToSat(Satellite satellite, Creatures creatures) throws FileNotFoundException {
+        try {
+            ResultSet result = stat.executeQuery("SELECT * FROM creature where name_cre = '"+creatures.getName()+"'");
+            if(!result.next())
+                stat.executeUpdate("insert into ore values ("+creatures.getId()+"," + "'"+creatures.getName()+"'," + "'"+creatures.getType()+"'");
+            stat.executeUpdate("insert into satellite_ore values ("+satellite.getId()+"," + "'"+creatures.get+"'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }*/
+    public void addCentralObj(PlanetSystem planetSystem, CentralObject centralObject) throws FileNotFoundException {
+        try {
+            stat.executeUpdate("insert into spaceobj values (" + centralObject.getId() + "," +
+                    "'" + centralObject.getName() + "')," +
+                    "'" + planetSystem.getId() + "'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* public Satellite loadPlanet(UUID namePlanet) throws FileNotFoundException {
+         File file = new File("planet/"+namePlanet + ".yml");
+         Satellite data = null;
+         if (file.exists()) {
+             InputStream inputStream = new FileInputStream(file);
+             Yaml yaml = new Yaml();
+             data = yaml.load(inputStream);
+         }
+         return data;
+     }
+     public ArrayList<Satellite> loadArrayPlanets(ArrayList<UUID> namePlanet) throws FileNotFoundException {
+         ArrayList<Satellite> data = new ArrayList<>();
+         for(UUID uu : namePlanet)
+             data.add(loadPlanet(uu));
+         return data;
+     }*/
     public void saveCentralObj(CentralObject centralObject) throws FileNotFoundException {
-        PrintWriter writer = new PrintWriter(new File("centralObject/"+centralObject.getId() + ".yml"));
+        PrintWriter writer = new PrintWriter(new File("centralObject/" + centralObject.getId() + ".yml"));
         Yaml yaml = new Yaml();
         yaml.dump(centralObject, writer);
     }
-    public CentralObject loadCentralObj(UUID namePlanet) throws FileNotFoundException {
+    /*public CentralObject loadCentralObj(UUID namePlanet) throws FileNotFoundException {
         File file = new File("centralObject/"+namePlanet + ".yml");
         CentralObject data = null;
         if (file.exists()) {
@@ -129,5 +370,5 @@ public class Controller {
             data = yaml.load(inputStream);
         }
         return data;
-    }
+    }*/
 }
