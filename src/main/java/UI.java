@@ -4,12 +4,13 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
 
 public class UI {
-    public static void menu() throws FileNotFoundException {
+    public static void menu() throws FileNotFoundException, SQLException {
         final Controller controller = new Controller();
         final Scanner sc = new Scanner(System.in);
         boolean openMenu = true;
@@ -33,7 +34,7 @@ public class UI {
         }
     }
 
-    public static void menuPlanetSystem(Scanner sc, Controller controller, PlanetSystem planetSystem) throws FileNotFoundException {
+    public static void menuPlanetSystem(Scanner sc, Controller controller, PlanetSystem planetSystem) throws FileNotFoundException, SQLException {
         while(true) {
             System.out.println(planetSystem);
             System.out.println("=========================");
@@ -60,7 +61,7 @@ public class UI {
             }
         }
     }
-    public static void menuSatillite(Scanner sc, Controller controller, PlanetSystem planetSystem,Satellite selectedSatillite){
+    public static void menuSatillite(Scanner sc, Controller controller, PlanetSystem planetSystem,Satellite selectedSatillite) throws SQLException {
         while (true) {
             System.out.println(selectedSatillite.toString(1));
             System.out.println("=========================");
@@ -106,7 +107,7 @@ public class UI {
             }
         }
     }
-    public static void menuOres(Scanner sc, Controller controller, Satellite selectedSatillite){
+    public static void menuOres(Scanner sc, Controller controller, Satellite selectedSatillite) throws SQLException {
         while (true) {
             for(Ore o : selectedSatillite.getOres())
                 System.out.println(o.toString(1));
@@ -133,7 +134,7 @@ public class UI {
             }
         }
     }
-    public static void menuCreatures(Scanner sc, Controller controller, Satellite selectedSatillite){
+    public static void menuCreatures(Scanner sc, Controller controller, Satellite selectedSatillite) throws SQLException {
         while (true) {
             for(Creatures o : selectedSatillite.getCreatures())
                 System.out.println(o.toString(1));

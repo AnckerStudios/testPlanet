@@ -6,10 +6,12 @@ public class Creatures {
 
     // Construct
     public Creatures() {
+        this.id = UUID.randomUUID();
         this.name = "1";
         this.type = "1";
     }
     public Creatures(String name, String type) {
+        this.id = UUID.randomUUID();
         this.name = name;
         this.type = type;
     }

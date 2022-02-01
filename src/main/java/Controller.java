@@ -11,7 +11,6 @@ public class Controller {
     private String user = "postgres";
     private String pass = "111";
     private Connection conn = null;
-    Connection connection = null;
     private Statement stat = null;
 
     public Controller() {
@@ -28,18 +27,6 @@ public class Controller {
         }*/
     }
 
-    /*public void add(Object o1, Object o2){
-        if(o2 instanceof PlanetSystem)
-            ((PlanetSystem) o2).addPlanet((Satellite) o1);
-        else if(o2 instanceof Satellite){
-            if(o1 instanceof Satellite)
-                ((Planet) o2).addSatellite((Satellite) o1);
-            if(o1 instanceof Ore)
-                ((Satellite) o2).addOre((Ore) o1);
-            if(o1 instanceof Creatures)
-                ((Satellite) o2).addCreature((Creatures) o1);
-        }
-    }*/
     public void delPlanet(String planetName, PlanetSystem planetSystem) {
         try {
             stat.executeUpdate("DELETE FROM spaceobj WHERE name_sat = '" + planetName + "'");
@@ -60,14 +47,22 @@ public class Controller {
 
     public void addPlanet(Satellite planet, PlanetSystem planetSystem) {
         planetSystem.addPlanet(planet);
-        try {
-            if (planet instanceof Planet)
-                addPlanetToPS(planetSystem, (Planet) planet);
-            else
-                addSatelliteToPS(planetSystem, planet);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+
+            if (planet instanceof Planet) {
+                try {
+                    addPlanetToPS(planetSystem, (Planet) planet);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                try {
+                    addSatelliteToPS(planetSystem, planet);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
     }
 
     public void delSatellite(int satelliteIndex, Planet planet) {
@@ -82,12 +77,14 @@ public class Controller {
     }
 
     public void addSatellite(PlanetSystem planetSystem, Satellite satellite, Planet planet) {
+
         try {
             addSatelliteToPlanet(planetSystem, planet, satellite);
-            planet.addSatellite(satellite);
-        } catch (FileNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
+        planet.addSatellite(satellite);
+
     }
 
     public void delOre(String oreName, Satellite satellite) {
@@ -100,20 +97,11 @@ public class Controller {
         }
     }
 
-    public void addOre(Ore ore, Satellite satellite) {
-        /*try {
-            ResultSet result = stat.executeQuery("SELECT * FROM ore where name_ore = '" + ore.getName() + "'");
-            if (!result.next())
-                stat.executeUpdate("insert into ore values (" + ore.getId() + "," + "'" + ore.getName() + "'");
-            stat.executeUpdate("insert into satellite_ore values (" + satellite.getId() + "," + "'" + ore.getId() + "'");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        satellite.addOre(ore);*/
+    public void addOre(Ore ore, Satellite satellite) throws SQLException {
+        Connection connection = null;
+        connection = DriverManager.getConnection(url, user, pass);
         try {
-            connection = DriverManager.getConnection(url, user, pass);
-            try {
-                connection.setAutoCommit(false);
+            connection.setAutoCommit(false);
             String sql = "insert into ore values (?,?)";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setObject(1,ore.getId());
@@ -131,11 +119,10 @@ public class Controller {
             if (rows2 > 0)
                 System.out.println("good!");
                 connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-            }
         } catch (SQLException e) {
+            connection.rollback();
             e.printStackTrace();
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
@@ -160,18 +147,9 @@ public class Controller {
         satellite.delCreatureByName(creaturesName);
     }
 
-    public void addCreatures(Creatures creatures, Satellite satellite) {
-        /*try {
-            ResultSet result = stat.executeQuery("SELECT * FROM creature where name_cre = '" + creatures.getName() + "'");
-            if (!result.next())
-                stat.executeUpdate("insert into ore values (" + creatures.getId() + "," + "'" + creatures.getName() + "'," + "'" + creatures.getType() + "'");
-            stat.executeUpdate("insert into satellite_ore values (" + satellite.getId() + "," + "'" + creatures.getId() + "'");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        satellite.addCreature(creatures);*/
-        try {
-            connection = DriverManager.getConnection(url, user, pass);
+    public void addCreatures(Creatures creatures, Satellite satellite) throws SQLException {
+        Connection connection = null;
+        connection = DriverManager.getConnection(url, user, pass);
             try {
                 connection.setAutoCommit(false);
             String sql = "insert into creature values (?,?,?)";
@@ -191,11 +169,11 @@ public class Controller {
             if (rows2 > 0)
                 System.out.println("good!");
                 connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-            }
+
         } catch (SQLException e) {
+            connection.rollback();
             e.printStackTrace();
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
@@ -211,32 +189,41 @@ public class Controller {
         satellite.setCreatureByName(creaturesName, creatures);
     }
 
-    public void addPlanetSystem(PlanetSystem planetSystem) throws FileNotFoundException {
-        try {
-            connection = DriverManager.getConnection(url, user, pass);
+    public void addPlanetSystem(PlanetSystem planetSystem) throws SQLException {
+        Connection connection = null;
+        connection = DriverManager.getConnection(url, user, pass);
+        connection.setAutoCommit(false);
+        //Savepoint savepointOne = null;
+
             try {
-                connection.setAutoCommit(false);
+                //savepointOne = connection.setSavepoint("SavepointOne");
                 String sql = "INSERT INTO planetSystem VALUES (?,?)";
                 PreparedStatement statement = connection.prepareStatement(sql);
-                statement.setObject(1,planetSystem.getId());
-                statement.setString(2,planetSystem.getName());
+                statement.setObject(1, planetSystem.getId());
+                statement.setString(2, planetSystem.getName());
                 int rows = statement.executeUpdate();
                 if (rows > 0)
                     System.out.println("good!");
-                addCentralObj(planetSystem, planetSystem.getCentralObject());
-                for (Satellite s : planetSystem.getPlanets()) {
-                   if (s instanceof Planet)
-                       addPlanetToPS(planetSystem, (Planet) s);
-                   else
-                        addSatelliteToPS(planetSystem, s);
-                }
                 connection.commit();
-            } catch (Exception e) {
+                try {
+                    addCentralObj(planetSystem, planetSystem.getCentralObject());
+                    for (Satellite s : planetSystem.getPlanets()) {
+                        if (s instanceof Planet)
+                            addPlanetToPS(planetSystem, (Planet) s);
+                        else
+                            addSatelliteToPS(planetSystem, s);
+                    }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    e.printStackTrace();
+                    throw new SQLException();
+                }
+            } catch (SQLException e) {
                 connection.rollback();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
+                e.printStackTrace();
+                throw new SQLException();
+            } finally {
             if(connection != null) {
                 try {
                     connection.close();
@@ -256,28 +243,33 @@ public class Controller {
             savePlanet(s);*/
     }
 
-    public void updatePlanetSystem(PlanetSystem planetSystem) throws FileNotFoundException {
+    /*public void updatePlanetSystem(PlanetSystem planetSystem) throws FileNotFoundException {
         try {
             int rows = stat.executeUpdate("update planetSystem set name_ps = '" + planetSystem.getName() + "' where id_ps = '" + planetSystem.getId() + "'");
             System.out.println(rows);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     /*public void save(PlanetSystem planetSystem) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(new File(planetSystem.getName() + ".yml"));
         Yaml yaml = new Yaml();
         yaml.dump(planetSystem, writer);
     }*/
-    public PlanetSystem read2(String namePlanetSystem) throws FileNotFoundException {
+    public PlanetSystem read2(String namePlanetSystem) throws SQLException {
+        Connection connection = null;
+        connection = DriverManager.getConnection(url, user, pass);
         try {
             ArrayList<Satellite> satellites = new ArrayList<>();
-            ResultSet result = stat.executeQuery("SELECT * FROM spaceobj inner join planetSystem on id_ps = fk_planetsystem_id where name_ps = '" + namePlanetSystem + "' and fk_planet_id is NULL");
+            String sql = "SELECT * FROM spaceobject inner join planetSystem on sys_uuid = fk_sys_uuid where sys_name = ? and fk_obj_uuid is NULL";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, namePlanetSystem);
+            ResultSet result = statement.executeQuery();
             while (result.next()) {
-                int id = result.getInt("id_sat");
+                UUID id = (UUID) result.getObject("obj_uuid");
                 System.out.println(id);
-                String name = result.getString("name_sat");
+                String name = result.getString("obj_name");
                 String climate = result.getString("climate");
                 String discriminator = result.getString("discriminator");
                 if (discriminator.equals("planet"))
@@ -285,40 +277,61 @@ public class Controller {
                 else
                     satellites.add(new Satellite(name, climate, id));
             }
+            //statement.clearParameters();
             for (Satellite s : satellites) {
-                ResultSet oresResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'");
+                String sql2 = "select obj_name,ore_name from (select obj_uuid, ore_name from object_ore inner join ore on object_ore.ore_uuid = ore.ore_uuid) as Query inner join spaceobject on spaceObject.obj_uuid = obj_uuid where obj_name = ?";
+                PreparedStatement statement2 = connection.prepareStatement(sql2);
+                statement2.setString(1, s.getName());
+                ResultSet oresResult = statement2.executeQuery();
+                //ResultSet oresResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'");
                 List<Ore> ores = new ArrayList<>();
                 while (oresResult.next()) {
-                    ores.add(new Ore(oresResult.getString("name_ore"), 1));
+                    ores.add(new Ore(oresResult.getString("ore_name"), 1));
                 }
                 s.addOreArr(ores);
-                ResultSet creaturesResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'");
+                String sql3 = "select obj_name,cre_name,cre_type from (select obj_uuid, cre_name,cre_type from object_creature inner join creature on object_creature.cre_uuid = creature.cre_uuid) as Query inner join spaceobject on spaceObject.obj_uuid = object_creature.obj_uuid where obj_name = ?";
+                PreparedStatement statement3 = connection.prepareStatement(sql3);
+                statement3.setString(1, s.getName());
+                ResultSet creaturesResult = statement3.executeQuery();
+                //"select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'";
                 List<Creatures> creatures = new ArrayList<>();
                 while (creaturesResult.next()) {
-                    creatures.add(new Creatures(creaturesResult.getString("name_cre"), creaturesResult.getString("type_cre")));
+                    creatures.add(new Creatures(creaturesResult.getString("cre_name"), creaturesResult.getString("cre_type")));
                 }
                 s.addCreatureArr(creatures);
                 if (s instanceof Planet) {
                     ArrayList<Satellite> planetSat = new ArrayList<>();
-                    System.out.println(s.getIdSat());
-                    ResultSet planetSatResult = stat.executeQuery("select * from spaceobj where fk_planet_id = " + s.getIdSat());
+                    System.out.println(s.getId());
+                    String sql4 = "select * from spaceobject where fk_obj_uuid =?";
+                    PreparedStatement statement4 = connection.prepareStatement(sql4);
+                    statement4.setObject(1, s.getId());
+                    ResultSet planetSatResult = statement4.executeQuery();
+                    //ResultSet planetSatResult = stat.executeQuery("select * from spaceobj where fk_planet_id = " + s.getId());
                     while (planetSatResult.next()) {
-                        int id = planetSatResult.getInt("id_sat");
-                        String name = planetSatResult.getString("name_sat");
+                        UUID id = (UUID) planetSatResult.getObject("obj_uuid");
+                        String name = planetSatResult.getString("obj_name");
                         String climate = planetSatResult.getString("climate");
                         planetSat.add(new Satellite(name, climate, id));
                     }
                     for (Satellite plSat : planetSat) {
-                        ResultSet oresSatResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
+                        String sql5 = "select obj_name,ore_name from (select obj_uuid, ore_name from object_ore inner join ore on ore_uuid = ore_uuid) as Query inner join spaceobject on obj_uuid = obj_uuid where obj_name = ?";
+                        PreparedStatement statement5 = connection.prepareStatement(sql5);
+                        statement5.setString(1, plSat.getName());
+                        ResultSet oresSatResult = statement5.executeQuery();
+                        //ResultSet oresSatResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
                         List<Ore> oresSat = new ArrayList<>();
                         while (oresSatResult.next()) {
-                            oresSat.add(new Ore(oresSatResult.getString("name_ore"), 1));
+                            oresSat.add(new Ore(oresSatResult.getString("ore_name"), 1));
                         }
                         plSat.addOreArr(oresSat);
-                        ResultSet creaturesSatResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
+                        String sql6 = "select obj_name,cre_name,cre_type from (select obj_uuid, cre_name,cre_type from object_creature inner join creature on cre_uuid = cre_uuid) as Query inner join spaceobject on obj_uuid = obj_uuid where obj_name = ?";
+                        PreparedStatement statement6 = connection.prepareStatement(sql6);
+                        statement6.setString(1, plSat.getName());
+                        ResultSet creaturesSatResult = statement6.executeQuery();
+                        //ResultSet creaturesSatResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
                         List<Creatures> creaturesSat = new ArrayList<>();
                         while (creaturesSatResult.next()) {
-                            creaturesSat.add(new Creatures(creaturesSatResult.getString("name_cre"), creaturesSatResult.getString("type_cre")));
+                            creaturesSat.add(new Creatures(creaturesSatResult.getString("cre_name"), creaturesSatResult.getString("cre_type")));
                         }
                         plSat.addCreatureArr(creaturesSat);
                     }
@@ -326,9 +339,13 @@ public class Controller {
                 }
             }
             CentralObject centralObject = null;
-            ResultSet centralObjResult = stat.executeQuery("select * from centralObject inner join planetSystem on id_ps = fk_planetsystem_id where name_ps = '" + namePlanetSystem + "'");
+            String sql7 = "select * from centralObject inner join planetSystem on sys_uuid = fk_sys_uuid where sys_name = ?";
+            PreparedStatement statement7 = connection.prepareStatement(sql7);
+            statement7.setString(1, namePlanetSystem);
+            ResultSet centralObjResult = statement7.executeQuery();
+            //ResultSet centralObjResult = stat.executeQuery("select * from centralObject inner join planetSystem on id_ps = fk_planetsystem_id where name_ps = '" + namePlanetSystem + "'");
             if (centralObjResult.next())
-                centralObject = new Star(centralObjResult.getString("name_co"));
+                centralObject = new Star(centralObjResult.getString("central_name"));
             return new PlanetSystem(namePlanetSystem, centralObject, satellites);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -346,24 +363,11 @@ public class Controller {
         }
         return data;
     }*/
-    public void addSatelliteToPlanet(PlanetSystem planetSystem, Planet planet, Satellite satellite) throws FileNotFoundException {
-        /*try {
-            int rows = stat.executeUpdate("insert into spaceobj values (" + planet.getId() + "," +
-                    "'" + satellite.getClass().getSimpleName().toLowerCase(Locale.ROOT) + "'," +
-                    "'" + satellite.getName() + "')," +
-                    "'" + satellite.getClimate() + "', '" + planet.getId() + "' , '" + planetSystem.getId() + "'");
-            for (Ore o : satellite.getOres())
-                addOre(o, satellite);
-            for (Creatures c : satellite.getCreatures())
-                addCreatures(c, satellite);  //////////////////тут раньше был отдельный класс на добавление в бд а сейчас с добавлением в модель
-            System.out.println(rows);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }*/
+    public void addSatelliteToPlanet(PlanetSystem planetSystem, Planet planet, Satellite satellite) throws SQLException {
+        Connection connection = null;
+        connection = DriverManager.getConnection(url, user, pass);
         try {
-            connection = DriverManager.getConnection(url, user, pass);
-            try {
-                connection.setAutoCommit(false);
+            connection.setAutoCommit(false);
             String sql = "INSERT INTO spaceobject VALUES (?,?,?,?,?,?)";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setObject(1, satellite.getId());
@@ -374,19 +378,17 @@ public class Controller {
             statement.setObject(6, planetSystem.getId());
             int rows = statement.executeUpdate();
             if (rows > 0)
-                System.out.println("good!");
-            for (Satellite s : planet.getSatellite())
-                addSatelliteToPlanet(planetSystem, planet, s);
-            for (Ore o : planet.getOres())
-                addOre(o, planet);
-            for (Creatures c : planet.getCreatures())
-                addCreatures(c, planet);
-                connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-            }
+                System.out.println("good! 64");
+            connection.commit();
+            for (Ore o : satellite.getOres())
+                addOre(o, satellite);
+            for (Creatures c : satellite.getCreatures())
+                addCreatures(c, satellite);
+            connection.commit();
         } catch (SQLException e) {
+            connection.rollback();
             e.printStackTrace();
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
@@ -398,28 +400,11 @@ public class Controller {
         }
     }
 
-    public void addPlanetToPS(PlanetSystem planetSystem, Planet planet) throws FileNotFoundException {
-        /*try {
-
-            int rows = stat.executeUpdate("insert into spaceobj values (" + planet.getId() + "," +
-                    "'" + planet.getClass().getSimpleName().toLowerCase(Locale.ROOT) + "'," +
-                    "'" + planet.getName() + "')," +
-                    "'" + planet.getClimate() + "', null , '" + planetSystem.getId() + "'");
-            for (Ore o : planet.getOres())
-                addOre(o, planet);  //////////тут так же был 2-й класс
-            for (Creatures c : planet.getCreatures())
-                addCreatures(c, planet);
-            for (Satellite s : planet.getSatellite())
-                addSatelliteToPlanet(planetSystem, planet, s);
-
-            System.out.println(rows);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }*/
+    public void addPlanetToPS(PlanetSystem planetSystem, Planet planet) throws SQLException {
+        Connection connection = null;
+        connection = DriverManager.getConnection(url, user, pass);
         try {
-            connection = DriverManager.getConnection(url, user, pass);
-            try {
-                connection.setAutoCommit(false);
+            connection.setAutoCommit(false);
             String sql = "INSERT INTO spaceobject VALUES (?,?,?,?,null,?)";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setObject(1, planet.getId());
@@ -430,18 +415,22 @@ public class Controller {
             int rows = statement.executeUpdate();
             if (rows > 0)
                 System.out.println("good!");
+            connection.commit();
             for (Satellite s : planet.getSatellite())
                 addSatelliteToPlanet(planetSystem, planet, s);
-            for (Ore o : planet.getOres())
+            for (Ore o : planet.getOres()) {
+                System.out.println(planet.getOres());
                 addOre(o, planet);
+                System.out.println("JKG");
+            }
             for (Creatures c : planet.getCreatures())
                 addCreatures(c, planet);
-                connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-            }
+            connection.commit();
+
         } catch (SQLException e) {
+            connection.rollback();
             e.printStackTrace();
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
@@ -453,25 +442,11 @@ public class Controller {
         }
     }
 
-    public void addSatelliteToPS(PlanetSystem planetSystem, Satellite planet) throws FileNotFoundException {
-        /*try {
-
-            int rows = stat.executeUpdate("insert into spaceobj values (" + planet.getId() + "," +
-                    "'" + planet.getClass().getSimpleName().toLowerCase(Locale.ROOT) + "'," +
-                    "'" + planet.getName() + "')," +
-                    "'" + planet.getClimate() + "', null , '" + planetSystem.getId() + "'");
-            for (Ore o : planet.getOres())
-                addOre(o, planet);
-            for (Creatures c : planet.getCreatures())
-                addCreatures(c, planet);
-            System.out.println(rows);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }*/
+    public void addSatelliteToPS(PlanetSystem planetSystem, Satellite planet) throws SQLException {
+        Connection connection = null;
+        connection = DriverManager.getConnection(url, user, pass);
         try {
-            connection = DriverManager.getConnection(url, user, pass);
-            try {
-                connection.setAutoCommit(false);
+            connection.setAutoCommit(false);
             String sql = "INSERT INTO spaceobject VALUES (?,?,?,?,null,?)";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setObject(1, planet.getId());
@@ -482,16 +457,16 @@ public class Controller {
             int rows = statement.executeUpdate();
             if (rows > 0)
                 System.out.println("good!");
+            connection.commit();
             for (Ore o : planet.getOres())
                 addOre(o, planet);
             for (Creatures c : planet.getCreatures())
                 addCreatures(c, planet);
                 connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-            }
         } catch (SQLException e) {
             e.printStackTrace();
+            connection.rollback();
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
@@ -503,61 +478,34 @@ public class Controller {
         }
     }
 
-    /*public void addOreToSat(Satellite satellite, Ore ore) throws FileNotFoundException {
-        try {
-            ResultSet result = stat.executeQuery("SELECT * FROM ore where name_ore = '"+ore.getName()+"'");
-            if(!result.next())
-                stat.executeUpdate("insert into ore values ("+ore.getId()+"," + "'"+ore.getName()+"'");
-            stat.executeUpdate("insert into satellite_ore values ("+satellite.getId()+"," + "'"+ore.get+"'");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }*/
-    /*public void addCreatureToSat(Satellite satellite, Creatures creatures) throws FileNotFoundException {
-        try {
-            ResultSet result = stat.executeQuery("SELECT * FROM creature where name_cre = '"+creatures.getName()+"'");
-            if(!result.next())
-                stat.executeUpdate("insert into ore values ("+creatures.getId()+"," + "'"+creatures.getName()+"'," + "'"+creatures.getType()+"'");
-            stat.executeUpdate("insert into satellite_ore values ("+satellite.getId()+"," + "'"+creatures.get+"'");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }*/
-    public void addCentralObj(PlanetSystem planetSystem, CentralObject centralObject) throws FileNotFoundException {
-        /*try {
-            stat.executeUpdate("insert into spaceobj values (" + centralObject.getId() + "," +
-                    "'" + centralObject.getName() + "')," +
-                    "'" + planetSystem.getId() + "'");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }*/
-        try {
+    public void addCentralObj(PlanetSystem planetSystem, CentralObject centralObject) throws SQLException {
+        Connection connection = null;
             connection = DriverManager.getConnection(url, user, pass);
             try {
                 connection.setAutoCommit(false);
-            String sql = "INSERT INTO centralobject VALUES (?,?,?)";
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setObject(1, centralObject.getId());
-            statement.setString(2, centralObject.getName());
-            statement.setObject(3, planetSystem.getId());
-            int rows = statement.executeUpdate();
-            if (rows > 0)
-                System.out.println("good!");
-                connection.commit();
+                String sql = "INSERT INTO centralobject VALUES (?,?,?)";
+                PreparedStatement statement = connection.prepareStatement(sql);
+                statement.setObject(1, centralObject.getId());
+                statement.setString(2, centralObject.getName());
+                statement.setObject(3, planetSystem.getId());
+                int rows = statement.executeUpdate();
+                if (rows > 0)
+                   System.out.println("good!");
+                    connection.commit();
             } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("ой sun");
                 connection.rollback();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if(connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                throw new SQLException();
+            } finally {
+                if(connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
     }
 
     /* public Satellite loadPlanet(UUID namePlanet) throws FileNotFoundException {

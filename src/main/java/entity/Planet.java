@@ -14,8 +14,8 @@ public class Planet extends Satellite {
         this.id = UUID.randomUUID();
         this.satellites = new ArrayList<>();
     }
-    public Planet(String name, String climate, int intId) {
-        super(name, climate, intId);
+    public Planet(String name, String climate, UUID id) {
+        super(name, climate, id);
         this.id = UUID.randomUUID();
         this.satellites = new ArrayList<>();
     }

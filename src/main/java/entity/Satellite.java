@@ -22,9 +22,8 @@ public class Satellite {
         this.creatures = new ArrayList<>();
         this.radius = 1;
     }
-    public Satellite(String name, String climate, int intId) {
-        this.idSat = intId;
-        this.id = UUID.randomUUID();
+    public Satellite(String name, String climate, UUID intId) {
+        this.id = intId;
         this.name = name;
         this.ores = new ArrayList<>();
         this.climate = climate;

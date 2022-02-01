@@ -5,10 +5,12 @@ public class Ore {
     private int quantity;
 
     public Ore() {
+        this.id = UUID.randomUUID();
         this.name = "1";
         this.quantity = 1;
     }
     public Ore(String name, int quantity) {
+        this.id = UUID.randomUUID();
         this.name = name;
         this.quantity = quantity;
     }
