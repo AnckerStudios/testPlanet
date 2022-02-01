@@ -53,7 +53,7 @@ public class Controller {
                 stat.executeUpdate("DELETE FROM satellite_ore WHERE satellite_id = '" + s.getId() + "'");
                 stat.executeUpdate("DELETE FROM satellite_creatures WHERE satellite_id = '" + s.getId() + "'");
             }
-            logger.debug("Planet " + planetName + "deleted successfully");
+            logger.debug("Planet " + planetName + "deleted successfully from " + planetSystem.getName());
         } catch (SQLException e) {
             e.printStackTrace();
             logger.error("Error!" + e);
@@ -68,12 +68,12 @@ public class Controller {
         try {
             if (planet instanceof Planet) {
                 addPlanetToPS(planetSystem, (Planet) planet);
-                logger.debug("Planet " + planet.getName() + "added successfully");
+                logger.debug("Planet " + planet.getName() + "added successfully to " + planetSystem.getName());
             }
 
             else {
                 addSatelliteToPS(planetSystem, planet);
-                logger.debug("Planet " + planet.getName() + "added successfully");
+                logger.debug("Planet " + planet.getName() + "added successfully " + planetSystem.getName());
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -87,7 +87,7 @@ public class Controller {
             stat.executeUpdate("DELETE FROM satellite_ore WHERE satellite_id = '" + planet.getSatelliteById(satelliteIndex).getId() + "'");
             stat.executeUpdate("DELETE FROM satellite_creatures WHERE satellite_id = '" + planet.getSatelliteById(satelliteIndex).getId() + "'");
             planet.delSatelliteById(satelliteIndex);
-            logger.debug("Satellite" + planet.getSatelliteById(satelliteIndex).getName() + "deleted successfully");
+            logger.debug("Satellite" + planet.getSatelliteById(satelliteIndex).getName() + "deleted successfully from " + planet.getName());
         } catch (SQLException e) {
             e.printStackTrace();
             logger.error("Error!" + e);
@@ -98,7 +98,7 @@ public class Controller {
         try {
             addSatelliteToPlanet(planetSystem, planet, satellite);
             planet.addSatellite(satellite);
-            logger.debug("Satellite " + satellite.getName() + "added successfully");
+            logger.debug("Satellite " + satellite.getName() + "added successfully to " + planet.getName());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             logger.error("Error!" + e);
@@ -109,7 +109,7 @@ public class Controller {
         try {
             stat.executeUpdate("DELETE FROM satellite_ore WHERE ore_id = '" + satellite.getOreByName(oreName).getId() + "'");
             satellite.delOreByName(oreName);
-            logger.info("Ore " + oreName + " deleted successfully");
+            logger.info("Ore " + oreName + " deleted successfully from " + satellite.getName());
         } catch (SQLException e) {
 
             e.printStackTrace();
@@ -158,7 +158,7 @@ public class Controller {
         } finally {
             if(connection != null) {
                 try {
-                    logger.info("Ore " + ore.getName() + " added successfully");
+                    logger.info("Ore " + ore.getName() + " added successfully to "  + satellite.getName());
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -175,7 +175,7 @@ public class Controller {
     public void delCreatures(String creaturesName, Satellite satellite) {
         try {
             stat.executeUpdate("DELETE FROM satellite_creatures WHERE creature_id = '" + satellite.getCreaturesByName(creaturesName).getId() + "'");
-            logger.info("Creatures " + creaturesName + " deleted successfully");
+            logger.info("Creatures " + creaturesName + " deleted successfully from " + satellite.getName());
         } catch (SQLException e) {
             e.printStackTrace();
             logger.error("Error!" + e);
@@ -224,7 +224,7 @@ public class Controller {
         } finally {
             if(connection != null) {
                 try {
-                    logger.info("Creatures " + creatures.getName() + " added successfully");
+                    logger.info("Creatures " + creatures.getName() + " added successfully to "  + satellite.getName());
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -236,6 +236,7 @@ public class Controller {
 
     public void setCreatures(String creaturesName, Creatures creatures, Satellite satellite) {
         satellite.setCreatureByName(creaturesName, creatures);
+        logger.info("Creatures " + creatures.getName() + " set successfully to "  + satellite.getName());
     }
 
     public void addPlanetSystem(PlanetSystem planetSystem) throws FileNotFoundException {
@@ -290,7 +291,7 @@ public class Controller {
     public void updatePlanetSystem(PlanetSystem planetSystem) throws FileNotFoundException {
         try {
             int rows = stat.executeUpdate("update planetSystem set name_ps = '" + planetSystem.getName() + "' where id_ps = '" + planetSystem.getId() + "'");
-            logger.info("PlanetSystem updated successfully");
+            logger.info("PlanetSystem " + planetSystem.getName() + " updated successfully");
             System.out.println(rows);
 
         } catch (SQLException e) {
@@ -372,7 +373,7 @@ public class Controller {
             ResultSet centralObjResult = stat.executeQuery("select * from centralObject inner join planetSystem on id_ps = fk_planetsystem_id where name_ps = '" + namePlanetSystem + "'");
             if (centralObjResult.next())
                 centralObject = new Star(centralObjResult.getString("name_co"));
-            logger.info("PlanetSystem " + namePlanetSystem + " read successfully");
+            logger.debug("PlanetSystem " + namePlanetSystem + " read successfully");
             return new PlanetSystem(namePlanetSystem, centralObject, satellites);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -496,7 +497,7 @@ public class Controller {
         } finally {
             if(connection != null) {
                 try {
-                    logger.info("Planet " + planet.getName() + " added to plaet system " + planetSystem.getName());
+                    logger.info("Planet " + planet.getName() + " added to planet system " + planetSystem.getName());
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
