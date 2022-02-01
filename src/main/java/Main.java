@@ -1,18 +1,15 @@
-import entity.*;
-import interfaces.CentralObject;
-import org.yaml.snakeyaml.*;
-import java.io.File;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.LinkedList;
 
 public class Main {
-    // я тут чет черканул
-    public static void main(String[] args) throws FileNotFoundException, SQLException {
-        //ArrayList<PlanetSystem> planetSystems = new ArrayList();
-
-
+    private static final Logger logger = LogManager.getLogger(Main.class);
+    public static void main(String[] args) throws FileNotFoundException {
+        logger.info("test message");
         UI.menu();
     }
 }

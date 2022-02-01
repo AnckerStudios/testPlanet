@@ -135,6 +135,14 @@ public class Satellite {
         ores.add(data);
     }
 
+    public void addOreArr(List<Ore> data){
+        this.ores = data;
+    }
+
+    public void addCreatureArr(List<Creatures> data){
+        this.creatures = data;
+    }
+
     public void delOreByIndex(int index) {
         if(index < 0 && index > getTotalAmountOfOre()){
             throw new OreNumOutOfBoundsException();

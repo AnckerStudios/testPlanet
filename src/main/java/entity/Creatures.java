@@ -4,6 +4,16 @@ public class Creatures {
     private String name;
     private String type;
 
+    private int Id;
+
+    public int getId() {
+        return Id;
+    }
+
+    public Creatures(int id) {
+        Id = id;
+    }
+
     // Construct
     public Creatures() {
         this.id = UUID.randomUUID();

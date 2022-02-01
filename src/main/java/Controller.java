@@ -1,5 +1,7 @@
 import entity.*;
 import interfaces.CentralObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -7,10 +9,12 @@ import java.sql.*;
 import java.util.*;
 
 public class Controller {
+    private static final Logger logger = LogManager.getLogger();
     private String url = "jdbc:postgresql://localhost:5432/universe";
     private String user = "postgres";
     private String pass = "111";
     private Connection conn = null;
+    Connection connection = null;
     private Statement stat = null;
 
     public Controller() {
@@ -27,6 +31,18 @@ public class Controller {
         }*/
     }
 
+    /*public void add(Object o1, Object o2){
+        if(o2 instanceof PlanetSystem)
+            ((PlanetSystem) o2).addPlanet((Satellite) o1);
+        else if(o2 instanceof Satellite){
+            if(o1 instanceof Satellite)
+                ((Planet) o2).addSatellite((Satellite) o1);
+            if(o1 instanceof Ore)
+                ((Satellite) o2).addOre((Ore) o1);
+            if(o1 instanceof Creatures)
+                ((Satellite) o2).addCreature((Creatures) o1);
+        }
+    }*/
     public void delPlanet(String planetName, PlanetSystem planetSystem) {
         try {
             stat.executeUpdate("DELETE FROM spaceobj WHERE name_sat = '" + planetName + "'");
@@ -37,8 +53,10 @@ public class Controller {
                 stat.executeUpdate("DELETE FROM satellite_ore WHERE satellite_id = '" + s.getId() + "'");
                 stat.executeUpdate("DELETE FROM satellite_creatures WHERE satellite_id = '" + s.getId() + "'");
             }
+            logger.debug("Planet " + planetName + "deleted successfully from " + planetSystem.getName());
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
 
         planetSystem.delPlanetByName(planetName);
@@ -47,22 +65,20 @@ public class Controller {
 
     public void addPlanet(Satellite planet, PlanetSystem planetSystem) {
         planetSystem.addPlanet(planet);
-
+        try {
             if (planet instanceof Planet) {
-                try {
-                    addPlanetToPS(planetSystem, (Planet) planet);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            else {
-                try {
-                    addSatelliteToPS(planetSystem, planet);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                addPlanetToPS(planetSystem, (Planet) planet);
+                logger.debug("Planet " + planet.getName() + "added successfully to " + planetSystem.getName());
             }
 
+            else {
+                addSatelliteToPS(planetSystem, planet);
+                logger.debug("Planet " + planet.getName() + "added successfully " + planetSystem.getName());
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            logger.error("Error!" + e);
+        }
     }
 
     public void delSatellite(int satelliteIndex, Planet planet) {
@@ -71,29 +87,34 @@ public class Controller {
             stat.executeUpdate("DELETE FROM satellite_ore WHERE satellite_id = '" + planet.getSatelliteById(satelliteIndex).getId() + "'");
             stat.executeUpdate("DELETE FROM satellite_creatures WHERE satellite_id = '" + planet.getSatelliteById(satelliteIndex).getId() + "'");
             planet.delSatelliteById(satelliteIndex);
+            logger.debug("Satellite" + planet.getSatelliteById(satelliteIndex).getName() + "deleted successfully from " + planet.getName());
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
     }
 
     public void addSatellite(PlanetSystem planetSystem, Satellite satellite, Planet planet) {
-
         try {
             addSatelliteToPlanet(planetSystem, planet, satellite);
         } catch (SQLException e) {
+            planet.addSatellite(satellite);
+            logger.debug("Satellite " + satellite.getName() + "added successfully to " + planet.getName());
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
-        planet.addSatellite(satellite);
-
     }
 
     public void delOre(String oreName, Satellite satellite) {
         try {
             stat.executeUpdate("DELETE FROM satellite_ore WHERE ore_id = '" + satellite.getOreByName(oreName).getId() + "'");
             satellite.delOreByName(oreName);
+            logger.info("Ore " + oreName + " deleted successfully from " + satellite.getName());
         } catch (SQLException e) {
 
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
     }
 
@@ -119,16 +140,23 @@ public class Controller {
             if (rows2 > 0)
                 System.out.println("good!");
                 connection.commit();
+            } catch (Exception e) {
+                connection.rollback();
+                logger.error("Error!" + e);
+            }
         } catch (SQLException e) {
             connection.rollback();
             e.printStackTrace();
             throw new SQLException();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
+                    logger.info("Ore " + ore.getName() + " added successfully to "  + satellite.getName());
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -141,8 +169,10 @@ public class Controller {
     public void delCreatures(String creaturesName, Satellite satellite) {
         try {
             stat.executeUpdate("DELETE FROM satellite_creatures WHERE creature_id = '" + satellite.getCreaturesByName(creaturesName).getId() + "'");
+            logger.info("Creatures " + creaturesName + " deleted successfully from " + satellite.getName());
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
         satellite.delCreatureByName(creaturesName);
     }
@@ -169,17 +199,23 @@ public class Controller {
             if (rows2 > 0)
                 System.out.println("good!");
                 connection.commit();
-
+            } catch (Exception e) {
+                connection.rollback();
+                logger.error("Error!" + e);
+            }
         } catch (SQLException e) {
             connection.rollback();
             e.printStackTrace();
             throw new SQLException();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
+                    logger.info("Creatures " + creatures.getName() + " added successfully to "  + satellite.getName());
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -187,6 +223,7 @@ public class Controller {
 
     public void setCreatures(String creaturesName, Creatures creatures, Satellite satellite) {
         satellite.setCreatureByName(creaturesName, creatures);
+        logger.info("Creatures " + creatures.getName() + " set successfully to "  + satellite.getName());
     }
 
     public void addPlanetSystem(PlanetSystem planetSystem) throws SQLException {
@@ -226,9 +263,11 @@ public class Controller {
             } finally {
             if(connection != null) {
                 try {
+                    logger.debug("PlanetSystem" + planetSystem.getName() + " added successfully");
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -250,7 +289,7 @@ public class Controller {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }*/
+    }
 
     /*public void save(PlanetSystem planetSystem) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(new File(planetSystem.getName() + ".yml"));
@@ -286,9 +325,12 @@ public class Controller {
                 //ResultSet oresResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'");
                 List<Ore> ores = new ArrayList<>();
                 while (oresResult.next()) {
-                    ores.add(new Ore(oresResult.getString("ore_name"), 1));
+                    ores.add(new Ore(oresResult.getString("name_ore"), 1));
+                    logger.info("Ore " + ores.get(ores.size() - 1).getName() + " added to " + s.getName());
                 }
                 s.addOreArr(ores);
+                logger.info("Ore list added");
+                ResultSet creaturesResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'");
                 String sql3 = "select obj_name,cre_name,cre_type from (select obj_uuid, cre_name,cre_type from object_creature inner join creature on object_creature.cre_uuid = creature.cre_uuid) as Query inner join spaceobject on spaceObject.obj_uuid = object_creature.obj_uuid where obj_name = ?";
                 PreparedStatement statement3 = connection.prepareStatement(sql3);
                 statement3.setString(1, s.getName());
@@ -296,9 +338,11 @@ public class Controller {
                 //"select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'";
                 List<Creatures> creatures = new ArrayList<>();
                 while (creaturesResult.next()) {
-                    creatures.add(new Creatures(creaturesResult.getString("cre_name"), creaturesResult.getString("cre_type")));
+                    creatures.add(new Creatures(creaturesResult.getString("name_cre"), creaturesResult.getString("type_cre")));
+                    logger.info("Creature " + creatures.get(creatures.size() - 1).getName() + " added to " + s.getName());
                 }
                 s.addCreatureArr(creatures);
+                logger.info("Creature list added");
                 if (s instanceof Planet) {
                     ArrayList<Satellite> planetSat = new ArrayList<>();
                     System.out.println(s.getId());
@@ -312,6 +356,7 @@ public class Controller {
                         String name = planetSatResult.getString("obj_name");
                         String climate = planetSatResult.getString("climate");
                         planetSat.add(new Satellite(name, climate, id));
+                        logger.info("Planet " + planetSat.get(planetSat.size() - 1).getName() + " added");
                     }
                     for (Satellite plSat : planetSat) {
                         String sql5 = "select obj_name,ore_name from (select obj_uuid, ore_name from object_ore inner join ore on ore_uuid = ore_uuid) as Query inner join spaceobject on obj_uuid = obj_uuid where obj_name = ?";
@@ -321,19 +366,19 @@ public class Controller {
                         //ResultSet oresSatResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
                         List<Ore> oresSat = new ArrayList<>();
                         while (oresSatResult.next()) {
-                            oresSat.add(new Ore(oresSatResult.getString("ore_name"), 1));
+                            oresSat.add(new Ore(oresSatResult.getString("name_ore"), 1));
+                            logger.info("Ore " + oresSat.get(oresSat.size() - 1).getName() + " added to " + plSat.getName());
                         }
                         plSat.addOreArr(oresSat);
-                        String sql6 = "select obj_name,cre_name,cre_type from (select obj_uuid, cre_name,cre_type from object_creature inner join creature on cre_uuid = cre_uuid) as Query inner join spaceobject on obj_uuid = obj_uuid where obj_name = ?";
-                        PreparedStatement statement6 = connection.prepareStatement(sql6);
-                        statement6.setString(1, plSat.getName());
-                        ResultSet creaturesSatResult = statement6.executeQuery();
-                        //ResultSet creaturesSatResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
+                        logger.info("Ore list added");
+                        ResultSet creaturesSatResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
                         List<Creatures> creaturesSat = new ArrayList<>();
                         while (creaturesSatResult.next()) {
-                            creaturesSat.add(new Creatures(creaturesSatResult.getString("cre_name"), creaturesSatResult.getString("cre_type")));
+                            creaturesSat.add(new Creatures(creaturesSatResult.getString("name_cre"), creaturesSatResult.getString("type_cre")));
+                            logger.info("Creature " + creaturesSat.get(creaturesSat.size() - 1).getName() + " added to " + plSat.getName());
                         }
                         plSat.addCreatureArr(creaturesSat);
+                        logger.info("Creature list added");
                     }
                     ((Planet) s).addSatelliteArr(planetSat);
                 }
@@ -346,9 +391,11 @@ public class Controller {
             //ResultSet centralObjResult = stat.executeQuery("select * from centralObject inner join planetSystem on id_ps = fk_planetsystem_id where name_ps = '" + namePlanetSystem + "'");
             if (centralObjResult.next())
                 centralObject = new Star(centralObjResult.getString("central_name"));
+            logger.debug("PlanetSystem " + namePlanetSystem + " read successfully");
             return new PlanetSystem(namePlanetSystem, centralObject, satellites);
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
         return null;
     }
@@ -389,12 +436,15 @@ public class Controller {
             connection.rollback();
             e.printStackTrace();
             throw new SQLException();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
+                    logger.info("Sattelite " + satellite.getName() + " added to planet " + planet.getName());
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -431,12 +481,15 @@ public class Controller {
             connection.rollback();
             e.printStackTrace();
             throw new SQLException();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
+                    logger.info("Planet " + planet.getName() + " added to planet system " + planetSystem.getName());
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -463,16 +516,23 @@ public class Controller {
             for (Creatures c : planet.getCreatures())
                 addCreatures(c, planet);
                 connection.commit();
+            } catch (Exception e) {
+                connection.rollback();
+                logger.error("Error!" + e);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             connection.rollback();
             throw new SQLException();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
+                    logger.info("Sattelite " + planet.getName() + " added to planet system " + planetSystem.getName());
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -528,6 +588,7 @@ public class Controller {
         PrintWriter writer = new PrintWriter(new File("centralObject/" + centralObject.getId() + ".yml"));
         Yaml yaml = new Yaml();
         yaml.dump(centralObject, writer);
+        logger.info("central object saved");
     }
     /*public CentralObject loadCentralObj(UUID namePlanet) throws FileNotFoundException {
         File file = new File("centralObject/"+namePlanet + ".yml");
