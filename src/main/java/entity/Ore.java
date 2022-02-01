@@ -1,19 +1,15 @@
 package entity;
-
+import java.util.UUID;
 public class Ore {
+
+
     private String name;
     private int quantity;
+    private UUID id;
 
-    private int Id;
-
-    public int getId() {
-        return Id;
+    public UUID getId(){
+        return this.id;
     }
-
-    public Ore(int id) {
-        Id = id;
-    }
-
     public Ore() {
         this.id = UUID.randomUUID();
         this.name = "1";

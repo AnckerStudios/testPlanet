@@ -13,6 +13,8 @@ public class Satellite {
     protected List <Ore> ores;
     private int radius;
 
+
+
     // Construct
     public Satellite() {
         this.id = UUID.randomUUID();
@@ -80,6 +82,7 @@ public class Satellite {
         }
     }
 
+
     public void setCreatureByName(String name, Creatures data){
         for (int i = 0; i < creatures.size(); i++) {
             if(creatures.get(i).getName().equals(name)) {
@@ -139,9 +142,6 @@ public class Satellite {
         this.ores = data;
     }
 
-    public void addCreatureArr(List<Creatures> data){
-        this.creatures = data;
-    }
 
     public void delOreByIndex(int index) {
         if(index < 0 && index > getTotalAmountOfOre()){
@@ -166,6 +166,10 @@ public class Satellite {
 
     public void addCreature(Creatures data){
         creatures.add(data);
+    }
+
+    public void addCreatureArr(List<Creatures> data){
+        this.creatures = data;
     }
 
     public void delCreatureByIndex(int index) {

@@ -6,27 +6,27 @@ import java.util.UUID;
 
 public class Planet extends Satellite {
     private List<Satellite> satellites;
-    final private UUID id;
+    //final private UUID id;
 
     // Construct
     public Planet() {
         super();
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID();
         this.satellites = new ArrayList<>();
     }
     public Planet(String name, String climate, UUID id) {
         super(name, climate, id);
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID();
         this.satellites = new ArrayList<>();
     }
     public Planet(String name, String climate, List<Creatures> creatures, List<Ore> ores, ArrayList<Satellite> satellites, int radius) {
         super(name, climate, creatures, ores, radius);
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID();
         this.satellites = satellites;
     }
     public Planet(String name, String climate, List<Creatures> creatures, List<Ore> ores, int radius) {
         super(name, climate, creatures, ores, radius);
-        this.id = UUID.randomUUID();
+        //this.id = UUID.randomUUID();
     }
 
     // Set n' Get
@@ -37,7 +37,6 @@ public class Planet extends Satellite {
         this.satellites = satellites;
     }
 
-    // Methods
     public Satellite getSatelliteById(int id){
         if(id < 0 && id > satellites.size()){
             throw new SatelliteIdOutOfBoundsException();
@@ -83,6 +82,10 @@ public class Planet extends Satellite {
                 satellites.remove(i);
             }
         }
+    }
+
+    public void addSatelliteArr(List<Satellite> data){
+        this.satellites = data;
     }
     public String toString(int offset){
         String tab = "\t";

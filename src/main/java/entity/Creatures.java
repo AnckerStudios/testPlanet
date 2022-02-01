@@ -1,18 +1,16 @@
 package entity;
 
+import java.util.UUID;
+
 public class Creatures {
     private String name;
     private String type;
-
-    private int Id;
-
-    public int getId() {
-        return Id;
+    private UUID id;
+    public UUID getId(){
+        return this.id;
     }
 
-    public Creatures(int id) {
-        Id = id;
-    }
+
 
     // Construct
     public Creatures() {

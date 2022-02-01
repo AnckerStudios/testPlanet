@@ -17,7 +17,7 @@ public class Controller {
     Connection connection = null;
     private Statement stat = null;
 
-    public Controller() {
+    public Controller() throws SQLException {
 
        /* try {
             Class.forName("org.postgresql.Driver");
@@ -60,7 +60,6 @@ public class Controller {
         }
 
         planetSystem.delPlanetByName(planetName);
-
     }
 
     public void addPlanet(Satellite planet, PlanetSystem planetSystem) {
@@ -70,14 +69,12 @@ public class Controller {
                 addPlanetToPS(planetSystem, (Planet) planet);
                 logger.debug("Planet " + planet.getName() + "added successfully to " + planetSystem.getName());
             }
-
             else {
                 addSatelliteToPS(planetSystem, planet);
                 logger.debug("Planet " + planet.getName() + "added successfully " + planetSystem.getName());
             }
-        } catch (FileNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-            logger.error("Error!" + e);
         }
     }
 
@@ -100,9 +97,6 @@ public class Controller {
         } catch (SQLException e) {
             planet.addSatellite(satellite);
             logger.debug("Satellite " + satellite.getName() + "added successfully to " + planet.getName());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            logger.error("Error!" + e);
         }
     }
 
@@ -140,15 +134,11 @@ public class Controller {
             if (rows2 > 0)
                 System.out.println("good!");
                 connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-                logger.error("Error!" + e);
-            }
         } catch (SQLException e) {
             connection.rollback();
             e.printStackTrace();
-            throw new SQLException();
             logger.error("Error!" + e);
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
@@ -199,15 +189,11 @@ public class Controller {
             if (rows2 > 0)
                 System.out.println("good!");
                 connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-                logger.error("Error!" + e);
-            }
         } catch (SQLException e) {
             connection.rollback();
             e.printStackTrace();
-            throw new SQLException();
             logger.error("Error!" + e);
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
@@ -231,7 +217,6 @@ public class Controller {
         connection = DriverManager.getConnection(url, user, pass);
         connection.setAutoCommit(false);
         //Savepoint savepointOne = null;
-
             try {
                 //savepointOne = connection.setSavepoint("SavepointOne");
                 String sql = "INSERT INTO planetSystem VALUES (?,?)";
@@ -301,6 +286,13 @@ public class Controller {
         connection = DriverManager.getConnection(url, user, pass);
         try {
             ArrayList<Satellite> satellites = new ArrayList<>();
+            String sql0 = "SELECT sys_uuid from planetSystem where sys_name = ?";
+            PreparedStatement statement0 = connection.prepareStatement(sql0);
+            statement0.setString(1, namePlanetSystem);
+            ResultSet result0 = statement0.executeQuery();
+            UUID idPS = null;
+            while (result0.next())
+                idPS = (UUID) result0.getObject("sys_uuid");
             String sql = "SELECT * FROM spaceobject inner join planetSystem on sys_uuid = fk_sys_uuid where sys_name = ? and fk_obj_uuid is NULL";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, namePlanetSystem);
@@ -318,34 +310,32 @@ public class Controller {
             }
             //statement.clearParameters();
             for (Satellite s : satellites) {
-                String sql2 = "select obj_name,ore_name from (select obj_uuid, ore_name from object_ore inner join ore on object_ore.ore_uuid = ore.ore_uuid) as Query inner join spaceobject on spaceObject.obj_uuid = obj_uuid where obj_name = ?";
+                String sql2 = "select obj_name,ore_name from (select fk2_obj_uuid, ore_name from object_ore inner join ore on fk2_ore_uuid = ore_uuid) as Query inner join spaceobject on obj_uuid = fk2_obj_uuid where obj_name = ?";
                 PreparedStatement statement2 = connection.prepareStatement(sql2);
                 statement2.setString(1, s.getName());
                 ResultSet oresResult = statement2.executeQuery();
                 //ResultSet oresResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'");
                 List<Ore> ores = new ArrayList<>();
                 while (oresResult.next()) {
-                    ores.add(new Ore(oresResult.getString("name_ore"), 1));
+                    ores.add(new Ore(oresResult.getString("ore_name"), 1));
                     logger.info("Ore " + ores.get(ores.size() - 1).getName() + " added to " + s.getName());
                 }
                 s.addOreArr(ores);
                 logger.info("Ore list added");
-                ResultSet creaturesResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'");
-                String sql3 = "select obj_name,cre_name,cre_type from (select obj_uuid, cre_name,cre_type from object_creature inner join creature on object_creature.cre_uuid = creature.cre_uuid) as Query inner join spaceobject on spaceObject.obj_uuid = object_creature.obj_uuid where obj_name = ?";
+                String sql3 = "select obj_name,cre_name,cre_type from (select fk2_obj_uuid, cre_name,cre_type from object_creature inner join creature on fk2_cre_uuid = cre_uuid) as Query inner join spaceobject on obj_uuid = fk2_obj_uuid where obj_name = ?";
                 PreparedStatement statement3 = connection.prepareStatement(sql3);
                 statement3.setString(1, s.getName());
                 ResultSet creaturesResult = statement3.executeQuery();
                 //"select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + s.getName() + "'";
                 List<Creatures> creatures = new ArrayList<>();
                 while (creaturesResult.next()) {
-                    creatures.add(new Creatures(creaturesResult.getString("name_cre"), creaturesResult.getString("type_cre")));
+                    creatures.add(new Creatures(creaturesResult.getString("cre_name"), creaturesResult.getString("cre_type")));
                     logger.info("Creature " + creatures.get(creatures.size() - 1).getName() + " added to " + s.getName());
                 }
                 s.addCreatureArr(creatures);
                 logger.info("Creature list added");
                 if (s instanceof Planet) {
                     ArrayList<Satellite> planetSat = new ArrayList<>();
-                    System.out.println(s.getId());
                     String sql4 = "select * from spaceobject where fk_obj_uuid =?";
                     PreparedStatement statement4 = connection.prepareStatement(sql4);
                     statement4.setObject(1, s.getId());
@@ -359,22 +349,26 @@ public class Controller {
                         logger.info("Planet " + planetSat.get(planetSat.size() - 1).getName() + " added");
                     }
                     for (Satellite plSat : planetSat) {
-                        String sql5 = "select obj_name,ore_name from (select obj_uuid, ore_name from object_ore inner join ore on ore_uuid = ore_uuid) as Query inner join spaceobject on obj_uuid = obj_uuid where obj_name = ?";
+                        String sql5 = "select obj_name,ore_name from (select fk2_obj_uuid, ore_name from object_ore inner join ore on fk2_ore_uuid = ore_uuid) as Query inner join spaceobject on obj_uuid = fk2_obj_uuid where obj_name = ?";
                         PreparedStatement statement5 = connection.prepareStatement(sql5);
                         statement5.setString(1, plSat.getName());
                         ResultSet oresSatResult = statement5.executeQuery();
                         //ResultSet oresSatResult = stat.executeQuery("select name_sat,name_ore from (select satellite_id, name_ore from satellite_ore inner join ore on ore_id = id_ore) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
                         List<Ore> oresSat = new ArrayList<>();
                         while (oresSatResult.next()) {
-                            oresSat.add(new Ore(oresSatResult.getString("name_ore"), 1));
+                            oresSat.add(new Ore(oresSatResult.getString("ore_name"), 1));
                             logger.info("Ore " + oresSat.get(oresSat.size() - 1).getName() + " added to " + plSat.getName());
                         }
                         plSat.addOreArr(oresSat);
                         logger.info("Ore list added");
-                        ResultSet creaturesSatResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select satellite_id, name_cre,type_cre from satellite_creatures inner join creature on creature_id = id_cre) as Query inner join spaceobj on id_sat = satellite_id where name_sat = '" + plSat.getName() + "'");
+                        String sql6 ="select obj_name,cre_name,cre_type from (select fk2_obj_uuid, cre_name,cre_type from object_creature inner join creature on fk2_cre_uuid = cre_uuid) as Query inner join spaceobject on obj_uuid = fk2_obj_uuid where obj_name = ?";
+                        PreparedStatement statement6 = connection.prepareStatement(sql6);
+                        statement6.setString(1, plSat.getName());
+                        ResultSet creaturesSatResult = statement6.executeQuery();
+                        //ResultSet creaturesSatResult = stat.executeQuery("select name_sat,name_cre,type_cre from (select fk2_satellite_id, name_cre,type_cre from satellite_creatures inner join creature on fk2_creature_id = id_cre) as Query inner join spaceobj on id_sat = fk2_satellite_id where name_sat = ?");
                         List<Creatures> creaturesSat = new ArrayList<>();
                         while (creaturesSatResult.next()) {
-                            creaturesSat.add(new Creatures(creaturesSatResult.getString("name_cre"), creaturesSatResult.getString("type_cre")));
+                            creaturesSat.add(new Creatures(creaturesSatResult.getString("cre_name"), creaturesSatResult.getString("cre_type")));
                             logger.info("Creature " + creaturesSat.get(creaturesSat.size() - 1).getName() + " added to " + plSat.getName());
                         }
                         plSat.addCreatureArr(creaturesSat);
@@ -392,7 +386,7 @@ public class Controller {
             if (centralObjResult.next())
                 centralObject = new Star(centralObjResult.getString("central_name"));
             logger.debug("PlanetSystem " + namePlanetSystem + " read successfully");
-            return new PlanetSystem(namePlanetSystem, centralObject, satellites);
+            return new PlanetSystem(idPS, namePlanetSystem, centralObject, satellites);
         } catch (SQLException e) {
             e.printStackTrace();
             logger.error("Error!" + e);
@@ -435,8 +429,8 @@ public class Controller {
         } catch (SQLException e) {
             connection.rollback();
             e.printStackTrace();
-            throw new SQLException();
             logger.error("Error!" + e);
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
@@ -480,8 +474,8 @@ public class Controller {
         } catch (SQLException e) {
             connection.rollback();
             e.printStackTrace();
-            throw new SQLException();
             logger.error("Error!" + e);
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
@@ -516,15 +510,11 @@ public class Controller {
             for (Creatures c : planet.getCreatures())
                 addCreatures(c, planet);
                 connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-                logger.error("Error!" + e);
-            }
         } catch (SQLException e) {
             e.printStackTrace();
             connection.rollback();
-            throw new SQLException();
             logger.error("Error!" + e);
+            throw new SQLException();
         } finally {
             if(connection != null) {
                 try {
