@@ -13,6 +13,18 @@ public class Satellite {
     protected List <Ore> ores;
     private int radius;
 
+    private int Id;
+
+    public void setIdSat(int id) {
+        Id = id;
+    }
+
+    public int getIdSat() {
+        return this.Id;
+    }
+
+
+
     // Construct
     public Satellite() {
         this.id = UUID.randomUUID();
@@ -23,7 +35,7 @@ public class Satellite {
         this.radius = 1;
     }
     public Satellite(String name, String climate, int intId) {
-        this.idSat = intId;
+        this.Id = intId;
         this.id = UUID.randomUUID();
         this.name = name;
         this.ores = new ArrayList<>();
@@ -134,6 +146,14 @@ public class Satellite {
 
     public void addOre(Ore data){
         ores.add(data);
+    }
+
+    public void addOreArr(List<Ore> data){
+        this.ores = data;
+    }
+
+    public void addCreatureArr(List<Creatures> data){
+        this.creatures = data;
     }
 
     public void delOreByIndex(int index) {

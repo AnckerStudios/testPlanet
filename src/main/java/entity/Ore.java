@@ -4,6 +4,16 @@ public class Ore {
     private String name;
     private int quantity;
 
+    private int Id;
+
+    public int getId() {
+        return Id;
+    }
+
+    public Ore(int id) {
+        Id = id;
+    }
+
     public Ore() {
         this.name = "1";
         this.quantity = 1;

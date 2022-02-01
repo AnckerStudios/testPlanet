@@ -1,5 +1,7 @@
 import entity.*;
 import interfaces.CentralObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -7,6 +9,7 @@ import java.sql.*;
 import java.util.*;
 
 public class Controller {
+    private static final Logger logger = LogManager.getLogger();
     private String url = "jdbc:postgresql://localhost:5432/universe";
     private String user = "postgres";
     private String pass = "111";
@@ -52,6 +55,7 @@ public class Controller {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
 
         planetSystem.delPlanetByName(planetName);
@@ -67,6 +71,7 @@ public class Controller {
                 addSatelliteToPS(planetSystem, planet);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
     }
 
@@ -78,6 +83,7 @@ public class Controller {
             planet.delSatelliteById(satelliteIndex);
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
     }
 
@@ -87,6 +93,7 @@ public class Controller {
             planet.addSatellite(satellite);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
     }
 
@@ -97,6 +104,7 @@ public class Controller {
         } catch (SQLException e) {
 
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
     }
 
@@ -133,15 +141,18 @@ public class Controller {
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
+                logger.error("Error!" + e);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -156,6 +167,7 @@ public class Controller {
             stat.executeUpdate("DELETE FROM satellite_creatures WHERE creature_id = '" + satellite.getCreaturesByName(creaturesName).getId() + "'");
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
         satellite.delCreatureByName(creaturesName);
     }
@@ -193,15 +205,18 @@ public class Controller {
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
+                logger.error("Error!" + e);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -233,15 +248,18 @@ public class Controller {
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
+                logger.error("Error!" + e);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -262,6 +280,7 @@ public class Controller {
             System.out.println(rows);
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
     }
 
@@ -332,6 +351,7 @@ public class Controller {
             return new PlanetSystem(namePlanetSystem, centralObject, satellites);
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         }
         return null;
     }
@@ -384,6 +404,7 @@ public class Controller {
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
+                logger.error("Error!" + e);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -393,6 +414,7 @@ public class Controller {
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -439,15 +461,18 @@ public class Controller {
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
+                logger.error("Error!" + e);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -489,15 +514,18 @@ public class Controller {
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
+                logger.error("Error!" + e);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }
@@ -546,15 +574,18 @@ public class Controller {
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
+                logger.error("Error!" + e);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            logger.error("Error!" + e);
         } finally {
             if(connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    logger.error("Error!" + e);
                 }
             }
         }

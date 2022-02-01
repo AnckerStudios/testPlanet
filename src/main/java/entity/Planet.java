@@ -53,6 +53,13 @@ public class Planet extends Satellite {
         return null;
     }
 
+    public List<Satellite> getSatellite(){
+        return satellites;
+    }
+
+    public void addSatelliteArr(ArrayList<Satellite> data){
+        this.satellites = data;
+    }
 
     public void setPlanetById(int id, Satellite data){
         if(id < 0 && id > satellites.size()){
