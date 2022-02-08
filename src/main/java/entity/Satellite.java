@@ -40,7 +40,14 @@ public class Satellite {
         this.creatures = creatures;
         this.radius = radius;
     }
-
+    public Satellite(UUID id, String name, String climate, List<Creatures> creatures, List <Ore> ores, int radius) {
+        this.id = id;
+        this.name = name;
+        this.ores = ores;
+        this.climate = climate;
+        this.creatures = creatures;
+        this.radius = radius;
+    }
     // Set n' Get
     public UUID getId() {
         return id;

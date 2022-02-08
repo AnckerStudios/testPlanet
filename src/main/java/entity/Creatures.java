@@ -23,6 +23,11 @@ public class Creatures {
         this.name = name;
         this.type = type;
     }
+    public Creatures(UUID id, String name, String type) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+    }
 
     // Set n' Get
     public String getName() {

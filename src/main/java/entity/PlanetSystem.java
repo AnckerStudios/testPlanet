@@ -1,13 +1,14 @@
 package entity;
 import interfaces.CentralObject;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class PlanetSystem{
     final private UUID id;
     private String name;
     private CentralObject centralObject;
-    private ArrayList<Satellite> planets;
+    private List<Satellite> planets;
 
     public PlanetSystem() {
         this.id = UUID.randomUUID();
@@ -16,13 +17,13 @@ public class PlanetSystem{
         this.planets = new ArrayList<>();
     }
     // Construct
-    public PlanetSystem(String name, CentralObject centralObject, ArrayList<Satellite> satellites) {
+    public PlanetSystem(String name, CentralObject centralObject, List<Satellite> satellites) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.centralObject = centralObject;
         this.planets = satellites;
     }
-    public PlanetSystem(UUID id, String name, CentralObject centralObject, ArrayList<Satellite> satellites) {
+    public PlanetSystem(UUID id, String name, CentralObject centralObject, List<Satellite> satellites) {
         this.id = id;
         this.name = name;
         this.centralObject = centralObject;
@@ -44,7 +45,7 @@ public class PlanetSystem{
     public void setCentralObject(CentralObject centralObject) {
         this.centralObject = centralObject;
     }
-    public ArrayList <Satellite> getPlanets() {
+    public List <Satellite> getPlanets() {
         return planets;
     }
     public void setPlanets(ArrayList <Satellite> satellites) {
@@ -52,8 +53,12 @@ public class PlanetSystem{
     }
 
     // Methods
-    public Satellite getPlanetById(int id){
-        return planets.get(id);
+    public Satellite getPlanetById(UUID id){
+        for(Satellite p : planets){
+            if(p.getId().equals(id))
+                return p;
+        }
+        return null;
     }
 
     public Satellite getPlanetByName(String name){

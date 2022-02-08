@@ -10,13 +10,18 @@ public class Ore {
     public UUID getId(){
         return this.id;
     }
-    public Ore() {
+    public Ore(Object ore_uuid) {
         this.id = UUID.randomUUID();
         this.name = "1";
         this.quantity = 1;
     }
     public Ore(String name, int quantity) {
         this.id = UUID.randomUUID();
+        this.name = name;
+        this.quantity = quantity;
+    }
+    public Ore(UUID id, String name, int quantity) {
+        this.id = id;
         this.name = name;
         this.quantity = quantity;
     }

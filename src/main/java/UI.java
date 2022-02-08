@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class UI {
     public static void menu() throws FileNotFoundException, SQLException {
-        final Controller controller = new Controller();
+        Controller controller = null;
         final Scanner sc = new Scanner(System.in);
         boolean openMenu = true;
         while (openMenu) {
@@ -21,11 +21,16 @@ public class UI {
             System.out.println("0 - Выход");
             switch (sc.nextLine()) {
                 case "1":
+                    controller = new Controller();
                     controller.addPlanetSystem(readPlanetSystem(sc));
+                    //controller.test();
+                    controller.close();
                     break;
                 case "2":
+                    controller = new Controller();
                     System.out.println("Введите название планетарной системы\n");
-                    menuPlanetSystem(sc, controller, controller.read2(sc.nextLine()));
+                    menuPlanetSystem(sc, controller, controller.readPlanetSystem(sc.nextLine()));
+                    controller.close();
                     break;
                 case "0":
                     openMenu = false;
@@ -34,7 +39,8 @@ public class UI {
         }
     }
 
-    public static void menuPlanetSystem(Scanner sc, Controller controller, PlanetSystem planetSystem) throws FileNotFoundException, SQLException {
+    public static void menuPlanetSystem(Scanner sc, Controller controller2, PlanetSystem planetSystem) throws FileNotFoundException, SQLException {
+        Controller controller = null;
         while(true) {
             System.out.println(planetSystem);
             System.out.println("=========================");
@@ -45,15 +51,21 @@ public class UI {
             int choice = Integer.parseInt(sc.nextLine());
             switch (choice) {
                 case 1:
-                    controller.addPlanet(readSatelliteType(sc), planetSystem);
+                    controller = new Controller();
+                    controller.addPlanetToUI(readSatelliteType(sc), planetSystem);
+                    controller.close();
                     break;
                 case 2:
+                    controller = new Controller();
                     System.out.println("Введите название небесного тела\n");
-                    controller.delPlanet(sc.nextLine(), planetSystem);
+                    controller.delPlanetToUI(sc.nextLine(), planetSystem);
+                    controller.close();
                     break;
                 case 3:
+                    controller = new Controller();
                     System.out.println("Введите название небесного тела или его номер\n");
                     menuSatillite(sc,controller,planetSystem ,planetSystem.getPlanetByName(sc.nextLine()));
+                    controller.close();
                     break;
                 case 0:
                     //controller.save2(planetSystem);
@@ -61,7 +73,8 @@ public class UI {
             }
         }
     }
-    public static void menuSatillite(Scanner sc, Controller controller, PlanetSystem planetSystem,Satellite selectedSatillite) throws SQLException {
+    public static void menuSatillite(Scanner sc, Controller controller2, PlanetSystem planetSystem,Satellite selectedSatillite) throws SQLException {
+        Controller controller = null;
         while (true) {
             System.out.println(selectedSatillite.toString(1));
             System.out.println("=========================");
@@ -76,38 +89,45 @@ public class UI {
             int choice = Integer.parseInt(sc.nextLine());
             switch (choice) {
                 case 1:
+                    controller = new Controller();
                     menuOres(sc,controller, selectedSatillite);
+                    controller.close();
                     break;
                 case 2:
+                    controller = new Controller();
                     menuCreatures(sc,controller, selectedSatillite);
+                    controller.close();
                     break;
                 case 3:
-                    if(selectedSatillite instanceof Planet)
-                        controller.addSatellite(planetSystem, readSatillite(sc), (Planet) selectedSatillite);
+                    if(selectedSatillite instanceof Planet) {
+                        controller = new Controller();
+                        controller.addSatelliteToUI(planetSystem, readSatillite(sc), (Planet) selectedSatillite);
+                        controller.close();
+                    }
                     break;
                 case 4:
                     if(selectedSatillite instanceof Planet) {
-                        System.out.println("Введите номер спутника");
-                        controller.delSatellite(Integer.parseInt(sc.nextLine()), (Planet) selectedSatillite);
+                        controller = new Controller();
+                        System.out.println("Введите название спутника");
+                        controller.delSatelliteToUI(sc.nextLine(), (Planet) selectedSatillite, planetSystem);
+                        controller.close();
                     }
                     break;
                 case 5:
                     if(selectedSatillite instanceof Planet) {
+                        controller = new Controller();
                         System.out.println("Введите название спутника\n");
                         menuSatillite(sc,controller,planetSystem,((Planet) selectedSatillite).getSatelliteByName(sc.nextLine()));
+                        controller.close();
                     }
                     break;
                 case 0:
-                    /*try {
-                        controller.savePlanet(selectedSatillite);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }*/
                     return;
             }
         }
     }
-    public static void menuOres(Scanner sc, Controller controller, Satellite selectedSatillite) throws SQLException {
+    public static void menuOres(Scanner sc, Controller controller2, Satellite selectedSatillite) throws SQLException {
+        Controller controller = null;
         while (true) {
             for(Ore o : selectedSatillite.getOres())
                 System.out.println(o.toString(1));
@@ -119,11 +139,15 @@ public class UI {
             int choice = Integer.parseInt(sc.nextLine());
             switch (choice) {
                 case 1:
+                    controller = new Controller();
                     controller.addOre(readOre(sc), selectedSatillite);
+                    controller.close();
                     break;
                 case 2:
+                    controller = new Controller();
                     System.out.println("Введите название руды");
                     controller.delOre(sc.nextLine(), selectedSatillite);
+                    controller.close();
                     break;
                 /*case 3:
                     System.out.println("Введите название руды");
@@ -134,27 +158,27 @@ public class UI {
             }
         }
     }
-    public static void menuCreatures(Scanner sc, Controller controller, Satellite selectedSatillite) throws SQLException {
+    public static void menuCreatures(Scanner sc, Controller controller2, Satellite selectedSatillite) throws SQLException {
+        Controller controller = null;
         while (true) {
             for(Creatures o : selectedSatillite.getCreatures())
                 System.out.println(o.toString(1));
             System.out.println("=========================");
             System.out.println("1 - Добавить живность ");
             System.out.println("2 - Удалить живность ");
-            System.out.println("3 - Изменить живность ");
             System.out.println("0 - Вернуться");
             int choice = Integer.parseInt(sc.nextLine());
             switch (choice) {
                 case 1:
+                    controller = new Controller();
                     controller.addCreatures(readCreatures(sc), selectedSatillite);
+                    controller.close();
                     break;
                 case 2:
+                    controller = new Controller();
                     System.out.println("Введите название живности");
                     controller.delCreatures(sc.nextLine(), selectedSatillite);
-                    break;
-                case 3:
-                    System.out.println("Введите название живности");
-                    controller.setCreatures(sc.nextLine(), readCreatures(sc), selectedSatillite);
+                    controller.close();
                     break;
                 case 0:
                     return;

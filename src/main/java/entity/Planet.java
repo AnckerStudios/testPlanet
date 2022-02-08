@@ -19,7 +19,7 @@ public class Planet extends Satellite {
         //this.id = UUID.randomUUID();
         this.satellites = new ArrayList<>();
     }
-    public Planet(String name, String climate, List<Creatures> creatures, List<Ore> ores, ArrayList<Satellite> satellites, int radius) {
+    public Planet(String name, String climate, List<Creatures> creatures, List<Ore> ores, List<Satellite> satellites, int radius) {
         super(name, climate, creatures, ores, radius);
         //this.id = UUID.randomUUID();
         this.satellites = satellites;
@@ -27,6 +27,10 @@ public class Planet extends Satellite {
     public Planet(String name, String climate, List<Creatures> creatures, List<Ore> ores, int radius) {
         super(name, climate, creatures, ores, radius);
         //this.id = UUID.randomUUID();
+    }
+    public Planet(UUID id, String name, String climate, List<Creatures> creatures, List<Ore> ores, List<Satellite> satellites, int radius) {
+        super(id, name, climate, creatures, ores, radius);
+        this.satellites = satellites;
     }
 
     // Set n' Get
